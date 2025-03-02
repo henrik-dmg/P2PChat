@@ -1,0 +1,17 @@
+//
+//  P2PChatApp.swift
+//  P2PChat
+//
+//  Created by Henrik Panhans on 02.03.25.
+//
+
+import SwiftUI
+
+@main
+struct P2PChatApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
