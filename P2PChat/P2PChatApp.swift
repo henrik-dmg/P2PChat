@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct P2PChatApp: App {
+
+    @State private var router = NavigationRouter()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            NavigationStack(path: $router.path) {
+                router.rootView()
+            }
         }
     }
+
 }
