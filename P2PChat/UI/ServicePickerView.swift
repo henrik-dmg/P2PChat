@@ -42,7 +42,12 @@ struct ServicePickerView: View {
                 peerInformationService: BonjourInformationService()
             )
         case .multipeer:
-            Text("Multipeer not supported yet")
+            PeerDiscoveryView(
+                discoveryService: MultipeerDiscoveryService(service: ServiceIdentifier("p2p-multipeer")),
+                advertisingService: MultipeerAdvertisingService(service: ServiceIdentifier("p2p-multipeer")),
+                dataTransferService: MultipeerDataTransferService(),
+                peerInformationService: MultipeerInformationService()
+            )
         }
     }
 

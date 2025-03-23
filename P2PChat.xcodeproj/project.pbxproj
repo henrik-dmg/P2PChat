@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		26014B352D9030E600E87831 /* ServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B342D9030E600E87831 /* ServiceType.swift */; };
+		26014B372D9034DA00E87831 /* MultipeerInformationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B362D9034D200E87831 /* MultipeerInformationService.swift */; };
+		26014B392D9034E700E87831 /* MultipeerAdvertisingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */; };
+		26014B3B2D9034F300E87831 /* MultipeerDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */; };
+		26014B3D2D9034FE00E87831 /* MultipeerDataTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */; };
+		26014B3F2D90351E00E87831 /* MultipeerPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3E2D90351A00E87831 /* MultipeerPeer.swift */; };
 		266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */; };
 		266192672D7B2B8C00CFC6D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */; };
 		266192682D7B2B8C00CFC6D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 266192602D7B2B8C00CFC6D7 /* Assets.xcassets */; };
@@ -35,6 +40,11 @@
 
 /* Begin PBXFileReference section */
 		26014B342D9030E600E87831 /* ServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceType.swift; sourceTree = "<group>"; };
+		26014B362D9034D200E87831 /* MultipeerInformationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerInformationService.swift; sourceTree = "<group>"; };
+		26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerAdvertisingService.swift; sourceTree = "<group>"; };
+		26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerDiscoveryService.swift; sourceTree = "<group>"; };
+		26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerDataTransferService.swift; sourceTree = "<group>"; };
+		26014B3E2D90351A00E87831 /* MultipeerPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerPeer.swift; sourceTree = "<group>"; };
 		2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		266192602D7B2B8C00CFC6D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		266192622D7B2B8C00CFC6D7 /* P2PChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PChat.entitlements; sourceTree = "<group>"; };
@@ -164,10 +174,10 @@
 		267E07C12D8DB9E200D4B86E /* Bonjour */ = {
 			isa = PBXGroup;
 			children = (
-				26634A132D902F350018A8C4 /* BonjourInformationService.swift */,
 				26634A0F2D902BF50018A8C4 /* BonjourAdvertisingService.swift */,
 				26634A0D2D902BEB0018A8C4 /* BonjourDataTransferService.swift */,
 				2661927C2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift */,
+				26634A132D902F350018A8C4 /* BonjourInformationService.swift */,
 				26CFD1A22D8F0EF500C37775 /* BonjourPeer.swift */,
 			);
 			path = Bonjour;
@@ -183,6 +193,11 @@
 		267E07C32D8DB9F000D4B86E /* Multipeer */ = {
 			isa = PBXGroup;
 			children = (
+				26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */,
+				26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */,
+				26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */,
+				26014B362D9034D200E87831 /* MultipeerInformationService.swift */,
+				26014B3E2D90351A00E87831 /* MultipeerPeer.swift */,
 			);
 			path = Multipeer;
 			sourceTree = "<group>";
@@ -264,21 +279,26 @@
 				2661926F2D7B3F8400CFC6D7 /* ServiceIdentifier.swift in Sources */,
 				266192762D7B422A00CFC6D7 /* ChatMessage.swift in Sources */,
 				2661927B2D7B45BF00CFC6D7 /* ServicePickerView.swift in Sources */,
+				26014B372D9034DA00E87831 /* MultipeerInformationService.swift in Sources */,
 				266192712D7B401400CFC6D7 /* PeerDataTransferService.swift in Sources */,
 				26634A0C2D902B8E0018A8C4 /* PeerAdvertisingService.swift in Sources */,
 				26634A0E2D902BEB0018A8C4 /* BonjourDataTransferService.swift in Sources */,
 				2661926B2D7B2BA700CFC6D7 /* Peer.swift in Sources */,
+				26014B3F2D90351E00E87831 /* MultipeerPeer.swift in Sources */,
 				266192782D7B429100CFC6D7 /* ChatView.swift in Sources */,
 				266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */,
 				26634A102D902BF50018A8C4 /* BonjourAdvertisingService.swift in Sources */,
 				26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */,
 				26CFD1992D8F023600C37775 /* PeerDiscoveryView.swift in Sources */,
 				2661927D2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift in Sources */,
+				26014B3B2D9034F300E87831 /* MultipeerDiscoveryService.swift in Sources */,
 				2661926D2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift in Sources */,
 				267E07C02D8DB5A300D4B86E /* Identifier.swift in Sources */,
 				266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */,
 				26634A142D902F3C0018A8C4 /* BonjourInformationService.swift in Sources */,
 				26CFD19F2D8F0A3500C37775 /* PeerInformationService.swift in Sources */,
+				26014B392D9034E700E87831 /* MultipeerAdvertisingService.swift in Sources */,
+				26014B3D2D9034FE00E87831 /* MultipeerDataTransferService.swift in Sources */,
 				26CFD1A32D8F0EF500C37775 /* BonjourPeer.swift in Sources */,
 				26CFD19D2D8F05BB00C37775 /* ServiceState.swift in Sources */,
 				26634A0A2D9027B60018A8C4 /* NWConnection+Extensions.swift in Sources */,
