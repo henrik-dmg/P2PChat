@@ -9,7 +9,10 @@ import Network
 
 struct BonjourPeer: Peer {
 
-    let id: String
     let endpoint: NWEndpoint
+
+    var id: String {
+        endpoint.debugDescription
+    }
 
 }

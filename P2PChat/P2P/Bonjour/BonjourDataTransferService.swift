@@ -9,8 +9,7 @@ import Foundation
 import Observation
 import Network
 
-@Observable
-final class BonjourDataTransferService: PeerDataTransferService {
+open class BonjourDataTransferService: PeerDataTransferService {
 
     // MARK: - Nested Types
 
@@ -19,17 +18,35 @@ final class BonjourDataTransferService: PeerDataTransferService {
     // MARK: - Properties
 
     @ObservationIgnored
-    private var connections: [ChatPeer.ID: NWConnection] = [:]
+    var connections: [ChatPeer.ID: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
     // MARK: - PeerDataTransferService
 
-    func connect(to peer: ChatPeer) async throws {
+    open func configure() async throws {}
+
+    func connect(to peer: ChatPeer) {
         let connection = NWConnection(to: peer.endpoint, using: .tcp)
-        try await connection.connect(queue: connectionsQueue)
-        receive(on: connection)
-        connections[peer.id] = connection
+        connect(with: connection, peerID: peer.id)
+    }
+
+    func connect(with connection: NWConnection, peerID: ChatPeer.ID) {
+        connection.stateUpdateHandler = { [weak self] newState in
+            switch newState {
+            case.ready:
+                print("Connection ready, starting receive")
+                self?.receive(on: connection)
+            case .failed(let error):
+                print("Connection error: \(error)")
+            case .cancelled:
+                print("Connection was stopped")
+            default:
+                print(newState)
+            }
+        }
+        connection.start(queue: connectionsQueue)
+        connections[peerID] = connection
     }
 
     func send(_ data: Data, to peer: ChatPeer) async throws {

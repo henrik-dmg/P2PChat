@@ -9,7 +9,7 @@ import MultipeerConnectivity
 import Observation
 
 @Observable
-final class MultipeerDiscoveryService: NSObject, PeerDiscoveryService {
+final class MultipeerDiscoveryService: MultipeerDataTransferService, PeerDiscoveryService {
 
     // MARK: - Nested Types
 
@@ -22,7 +22,7 @@ final class MultipeerDiscoveryService: NSObject, PeerDiscoveryService {
     private(set) var availablePeers = [ChatPeer]()
 
     @ObservationIgnored
-    private var browser: MCNearbyServiceBrowser?
+    private lazy var browser = makeBrowser()
 
     // MARK: - Init
 
@@ -34,17 +34,12 @@ final class MultipeerDiscoveryService: NSObject, PeerDiscoveryService {
     // MARK: - PeerDiscoveryService
 
     func startDiscoveringPeers() {
-        guard browser == nil else {
-            return // TODO: Throw error
-        }
-        browser = makeBrowser()
-        browser?.startBrowsingForPeers()
+        browser.startBrowsingForPeers()
         discoveryState = .active
     }
 
     func stopDiscoveringPeers() {
-        browser?.stopBrowsingForPeers()
-        browser = nil
+        browser.stopBrowsingForPeers()
         availablePeers = []
         discoveryState = .inactive
     }
@@ -65,7 +60,7 @@ extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
         print("Browser found peer: \(peerID.displayName)")
         availablePeers.append(MultipeerPeer(identifier: peerID, info: info))
     }
-    
+
     func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         print("Browser lost peer: \(peerID.displayName)")
         availablePeers.removeAll { peer in

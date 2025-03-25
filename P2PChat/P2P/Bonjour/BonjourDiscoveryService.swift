@@ -9,7 +9,7 @@ import SwiftUI
 import Network
 
 @Observable
-final class BonjourDiscoveryService: NSObject, PeerDiscoveryService {
+final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoveryService {
 
     // MARK: - Nested Types
 
@@ -74,7 +74,7 @@ final class BonjourDiscoveryService: NSObject, PeerDiscoveryService {
                 switch change {
                 case let .added(result):
                     print("+ \(result.endpoint)")
-                    let peer = BonjourPeer(id: result.hashValue.description, endpoint: result.endpoint)
+                    let peer = BonjourPeer(endpoint: result.endpoint)
                     self?.availablePeers.append(peer)
                 case let .removed(result):
                     print("- \(result.endpoint)")
@@ -91,7 +91,7 @@ final class BonjourDiscoveryService: NSObject, PeerDiscoveryService {
                     guard let peerIndex else {
                         break
                     }
-                    self?.availablePeers[peerIndex] = BonjourPeer(id: new.hashValue.description, endpoint: new.endpoint)
+                    self?.availablePeers[peerIndex] = BonjourPeer(endpoint: new.endpoint)
                 case .identical:
                     fallthrough
                 @unknown default:

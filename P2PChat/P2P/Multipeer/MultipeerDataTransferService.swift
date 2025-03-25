@@ -7,25 +7,27 @@
 
 import Foundation
 import Observation
-import Network
+import MultipeerConnectivity
 
-@Observable
-final class MultipeerDataTransferService: PeerDataTransferService {
-    func connect(to peer: MultipeerPeer) async throws {
-        
-    }
-    
-    func send(_ data: Data, to peer: MultipeerPeer) async throws {
-
-    }
-    
-    func disconnect(from peer: MultipeerPeer) {
-
-    }
-    
+class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
     typealias ChatPeer = MultipeerPeer
+
+    // MARK: - Properties
+
+    @ObservationIgnored
+    private var connections: [ChatPeer.ID: MCSession] = [:]
+
+    // MARK: - PeerDataTransferService
+
+    func configure() async throws {}
+
+    func connect(to peer: ChatPeer) async throws {}
+
+    func send(_ data: Data, to peer: ChatPeer) async throws {}
+
+    func disconnect(from peer: ChatPeer) {}
 
 }

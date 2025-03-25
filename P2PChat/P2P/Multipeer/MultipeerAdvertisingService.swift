@@ -9,7 +9,7 @@ import MultipeerConnectivity
 import Network
 
 @Observable
-final class MultipeerAdvertisingService: NSObject, PeerAdvertisingService {
+final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdvertisingService {
 
     // MARK: - Nested Types
 
@@ -18,13 +18,10 @@ final class MultipeerAdvertisingService: NSObject, PeerAdvertisingService {
     // MARK: - Properties
 
     let service: ServiceIdentifier
-
     private(set) var advertisingState: ServiceState = .inactive
 
     @ObservationIgnored
-    private var listener: MCNearbyServiceAdvertiser?
-    @ObservationIgnored
-    private let listenerQueue = DispatchQueue(label: "listenerQueue")
+    private lazy var advertiser = makeAdvertiser()
 
     // MARK: - Init
 
@@ -36,23 +33,18 @@ final class MultipeerAdvertisingService: NSObject, PeerAdvertisingService {
     // MARK: - PeerDiscoveryService
 
     func startAdvertisingService() {
-        guard listener == nil else {
-            return // TODO: Throw error
-        }
-        listener = makeListener()
-        listener?.startAdvertisingPeer()
+        advertiser.startAdvertisingPeer()
         advertisingState = .active
     }
 
     func stopAdvertisingService() {
-        listener?.stopAdvertisingPeer()
-        listener = nil
+        advertiser.stopAdvertisingPeer()
         advertisingState = .inactive
     }
 
     // MARK: - Helpers
 
-    func makeListener() -> MCNearbyServiceAdvertiser {
+    func makeAdvertiser() -> MCNearbyServiceAdvertiser {
         let advertiser = MCNearbyServiceAdvertiser(
             peer: MCPeerID(displayName: UIDevice.current.name),
             discoveryInfo: nil,
@@ -66,11 +58,17 @@ final class MultipeerAdvertisingService: NSObject, PeerAdvertisingService {
 
 extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
 
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didReceiveInvitationFromPeer peerID: MCPeerID, withContext context: Data?, invitationHandler: @escaping (Bool, MCSession?) -> Void) {
-        
+    func advertiser(
+        _ advertiser: MCNearbyServiceAdvertiser,
+        didReceiveInvitationFromPeer peerID: MCPeerID,
+        withContext context: Data?,
+        invitationHandler: @escaping (Bool, MCSession?) -> Void
+    ) {
+        print("Did receive invitation from \(peerID.displayName)")
     }
     
     func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
+        print("Advertiser did not start", error.localizedDescription)
         advertisingState = .error(error)
     }
 

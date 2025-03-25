@@ -7,9 +7,7 @@
 
 import Observation
 
-protocol PeerDiscoveryService<ChatPeer>: AnyObject, Observable {
-
-    associatedtype ChatPeer: Peer
+protocol PeerDiscoveryService<ChatPeer>: PeerDataTransferService {
 
     var service: ServiceIdentifier { get }
     var availablePeers: [ChatPeer] { get }

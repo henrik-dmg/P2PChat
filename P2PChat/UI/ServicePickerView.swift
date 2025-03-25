@@ -38,14 +38,12 @@ struct ServicePickerView: View {
             PeerDiscoveryView(
                 discoveryService: BonjourDiscoveryService(service: ServiceIdentifier("_p2p._tcp")),
                 advertisingService: BonjourAdvertisingService(service: ServiceIdentifier("_p2p._tcp")),
-                dataTransferService: BonjourDataTransferService(),
                 peerInformationService: BonjourInformationService()
             )
         case .multipeer:
             PeerDiscoveryView(
                 discoveryService: MultipeerDiscoveryService(service: ServiceIdentifier("p2p-multipeer")),
                 advertisingService: MultipeerAdvertisingService(service: ServiceIdentifier("p2p-multipeer")),
-                dataTransferService: MultipeerDataTransferService(),
                 peerInformationService: MultipeerInformationService()
             )
         }

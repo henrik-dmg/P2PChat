@@ -5,11 +5,12 @@
 //  Created by Henrik Panhans on 23.03.25.
 //
 
+import Foundation
 import Observation
 import Network
 
 @Observable
-final class BonjourAdvertisingService: NSObject, PeerAdvertisingService {
+final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
 
     // MARK: - Nested Types
 
@@ -18,7 +19,6 @@ final class BonjourAdvertisingService: NSObject, PeerAdvertisingService {
     // MARK: - Properties
 
     let service: ServiceIdentifier
-
     private(set) var advertisingState: ServiceState = .inactive
 
     @ObservationIgnored
@@ -71,8 +71,10 @@ final class BonjourAdvertisingService: NSObject, PeerAdvertisingService {
             }
         }
 
-        listener.newConnectionHandler = { connection in
-            print("New connection", connection)
+        listener.newConnectionHandler = { [weak self]  connection in
+            print("New connection", connection, connection.state)
+            let peer = BonjourPeer(endpoint: connection.endpoint)
+            self?.connect(with: connection, peerID: peer.id)
         }
         listener.newConnectionLimit = 1
 

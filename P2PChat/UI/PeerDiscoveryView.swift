@@ -11,9 +11,9 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
 
     @State var discoveryService: any PeerDiscoveryService<ChatPeer>
     @State var advertisingService: any PeerAdvertisingService<ChatPeer>
-    @State var dataTransferService: any PeerDataTransferService<ChatPeer>
     let peerInformationService: InformationService
 
+    @State private var isSetupComplete = false
     @State private var inspectedPeer: ChatPeer?
 
     var body: some View {
@@ -26,7 +26,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                     } else {
                         advertisingService.startAdvertisingService()
                     }
-                }
+                }.disabled(!isSetupComplete || discoveryService.discoveryState.isActive)
             }
             Section("Browsing") {
                 LabeledContent("Browsing for peers", value: discoveryService.discoveryState.isActive ? "Yes" : "No")
@@ -36,10 +36,19 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                     } else {
                         discoveryService.startDiscoveringPeers()
                     }
-                }
+                }.disabled(!isSetupComplete || advertisingService.advertisingState.isActive)
                 ForEach(discoveryService.availablePeers) { peer in
                     peerCellView(peer)
                 }
+            }
+        }.task {
+            do {
+                try await advertisingService.configure()
+                try await discoveryService.configure()
+                isSetupComplete = true
+            } catch {
+                print(error)
+                isSetupComplete = false
             }
         }
     }
@@ -47,7 +56,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
     @ViewBuilder
     private func peerCellView(_ peer: ChatPeer) -> some View {
         NavigationLink {
-            ChatView(service: dataTransferService, peer: peer)
+            ChatView(service: serviceToForward, peer: peer)
         } label: {
             peerInformationService.peerCellView(for: peer)
         }.swipeActions {
@@ -57,16 +66,20 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 Label("Info", systemImage: "person.fill.questionmark")
             }
             .tint(.blue)
-            Button {
-
-            } label: {
-                Label("Connect", systemImage: "bubble.fill")
-            }
-            .tint(.green)
         }
         .sheet(item: $inspectedPeer) { peer in
             peerInformationService.peerInformationView(for: peer)
         }
+    }
+
+    private var serviceToForward: any PeerDataTransferService<ChatPeer> {
+        if advertisingService.advertisingState.isActive {
+            return advertisingService
+        }
+        if discoveryService.discoveryState.isActive, advertisingService.advertisingState.isActive {
+            fatalError("Cant be listener and server simultaneously")
+        }
+        return discoveryService
     }
 
 }
