@@ -7,20 +7,26 @@
 
 import SwiftUI
 
-struct MultipeerInformationService: PeerInformationService {
+public struct MultipeerInformationService: PeerInformationService {
 
     // MARK: - Nested Types
 
-    typealias ChatPeer = MultipeerPeer
+    public typealias ChatPeer = MultipeerPeer
 
-    func peerCellView(for peer: ChatPeer) -> some View {
+    // MARK: - Init
+
+    public init() {}
+
+    // MARK: - Methods
+
+    public func peerCellView(for peer: ChatPeer) -> some View {
         VStack(alignment: .leading) {
             Text(peer.id)
             Text("Multipeer peer")
         }
     }
 
-    func peerInformationView(for peer: ChatPeer) -> some View {
+    public func peerInformationView(for peer: ChatPeer) -> some View {
         NavigationView {
             List {
                 LabeledContent("ID", value: peer.id)

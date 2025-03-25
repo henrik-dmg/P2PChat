@@ -7,6 +7,7 @@
 
 
 import Foundation
+import P2PKit
 
 enum User {}
 typealias UserID = Identifier<User, UUID>

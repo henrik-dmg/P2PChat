@@ -9,36 +9,32 @@ import MultipeerConnectivity
 import Observation
 
 @Observable
-final class MultipeerDiscoveryService: MultipeerDataTransferService, PeerDiscoveryService {
-
-    // MARK: - Nested Types
-
-    typealias ChatPeer = MultipeerPeer
+public final class MultipeerDiscoveryService: MultipeerDataTransferService, PeerDiscoveryService {
 
     // MARK: - Properties
 
-    let service: ServiceIdentifier
-    private(set) var discoveryState: ServiceState = .inactive
-    private(set) var availablePeers = [ChatPeer]()
+    public let service: ServiceIdentifier
+    public private(set) var discoveryState: ServiceState = .inactive
+    public private(set) var availablePeers = [ChatPeer]()
 
     @ObservationIgnored
     private lazy var browser = makeBrowser()
 
     // MARK: - Init
 
-    init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier) {
         self.service = service
         super.init()
     }
 
     // MARK: - PeerDiscoveryService
 
-    func startDiscoveringPeers() {
+    public func startDiscoveringPeers() {
         browser.startBrowsingForPeers()
         discoveryState = .active
     }
 
-    func stopDiscoveringPeers() {
+    public func stopDiscoveringPeers() {
         browser.stopBrowsingForPeers()
         availablePeers = []
         discoveryState = .inactive
@@ -56,12 +52,12 @@ final class MultipeerDiscoveryService: MultipeerDataTransferService, PeerDiscove
 
 extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
 
-    func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+    public func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
         print("Browser found peer: \(peerID.displayName)")
         availablePeers.append(MultipeerPeer(identifier: peerID, info: info))
     }
 
-    func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
+    public func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
         print("Browser lost peer: \(peerID.displayName)")
         availablePeers.removeAll { peer in
             peer.identifier == peerID

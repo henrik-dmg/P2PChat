@@ -9,7 +9,7 @@ import MultipeerConnectivity
 import Network
 
 @Observable
-final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdvertisingService {
+public final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdvertisingService {
 
     // MARK: - Nested Types
 
@@ -17,27 +17,27 @@ final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdver
 
     // MARK: - Properties
 
-    let service: ServiceIdentifier
-    private(set) var advertisingState: ServiceState = .inactive
+    public let service: ServiceIdentifier
+    public private(set) var advertisingState: ServiceState = .inactive
 
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
 
     // MARK: - Init
 
-    init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier) {
         self.service = service
         super.init()
     }
 
     // MARK: - PeerDiscoveryService
 
-    func startAdvertisingService() {
+    public func startAdvertisingService() {
         advertiser.startAdvertisingPeer()
         advertisingState = .active
     }
 
-    func stopAdvertisingService() {
+    public func stopAdvertisingService() {
         advertiser.stopAdvertisingPeer()
         advertisingState = .inactive
     }
@@ -58,7 +58,7 @@ final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdver
 
 extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
 
-    func advertiser(
+    public func advertiser(
         _ advertiser: MCNearbyServiceAdvertiser,
         didReceiveInvitationFromPeer peerID: MCPeerID,
         withContext context: Data?,
@@ -67,7 +67,7 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
         print("Did receive invitation from \(peerID.displayName)")
     }
     
-    func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
+    public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
         print("Advertiser did not start", error.localizedDescription)
         advertisingState = .error(error)
     }

@@ -6,6 +6,11 @@
 //
 
 import SwiftUI
+import P2PKit
+
+enum Constants {
+    static let serviceIdentifier = ServiceIdentifier("_p2p._tcp")
+}
 
 struct ServicePickerView: View {
 
@@ -36,8 +41,8 @@ struct ServicePickerView: View {
             Text("Bluetooth not supported yet")
         case .bonjour:
             PeerDiscoveryView(
-                discoveryService: BonjourDiscoveryService(service: ServiceIdentifier("_p2p._tcp")),
-                advertisingService: BonjourAdvertisingService(service: ServiceIdentifier("_p2p._tcp")),
+                discoveryService: BonjourDiscoveryService(service: Constants.serviceIdentifier),
+                advertisingService: BonjourAdvertisingService(service: Constants.serviceIdentifier),
                 peerInformationService: BonjourInformationService()
             )
         case .multipeer:

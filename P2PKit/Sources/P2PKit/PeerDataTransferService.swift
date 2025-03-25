@@ -8,7 +8,7 @@
 import Foundation
 import Observation
 
-protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
+public protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
 
     associatedtype ChatPeer: Peer
 

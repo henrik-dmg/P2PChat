@@ -10,7 +10,7 @@ import Observation
 import Network
 
 @Observable
-final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
+public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
 
     // MARK: - Nested Types
 
@@ -18,8 +18,8 @@ final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisi
 
     // MARK: - Properties
 
-    let service: ServiceIdentifier
-    private(set) var advertisingState: ServiceState = .inactive
+    public let service: ServiceIdentifier
+    public private(set) var advertisingState: ServiceState = .inactive
 
     @ObservationIgnored
     private var listener: NWListener?
@@ -28,14 +28,14 @@ final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisi
 
     // MARK: - Init
 
-    init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier) {
         self.service = service
         super.init()
     }
 
     // MARK: - PeerDiscoveryService
 
-    func startAdvertisingService() {
+    public func startAdvertisingService() {
         guard listener == nil else {
             return // TODO: Throw error
         }
@@ -47,7 +47,7 @@ final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisi
         }
     }
 
-    func stopAdvertisingService() {
+    public func stopAdvertisingService() {
         listener?.cancel()
         listener = nil
         advertisingState = .inactive
@@ -58,7 +58,7 @@ final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisi
     func makeListener() throws -> NWListener {
         let service = NWListener.Service(name: "P2P Chat Service", type: service.rawValue)
         let listener = try NWListener(service: service, using: .tcp)
-        listener.stateUpdateHandler = { newState in
+        listener.stateUpdateHandler = { [weak self] newState in
             switch newState {
             case.ready:
                 print("Listener ready")
@@ -66,6 +66,7 @@ final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisi
                 print("Listener error: \(error)")
             case .cancelled:
                 print("Listener was stopped")
+                self?.disconnectAll()
             default:
                 print(newState)
             }

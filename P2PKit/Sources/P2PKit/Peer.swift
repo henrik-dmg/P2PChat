@@ -5,7 +5,7 @@
 //  Created by Henrik Panhans on 07.03.25.
 //
 
-protocol Peer: Identifiable {
+public protocol Peer: Identifiable {
 
     var id: String { get }
 

@@ -7,7 +7,7 @@
 
 import Observation
 
-protocol PeerAdvertisingService<ChatPeer>: PeerDataTransferService {
+public protocol PeerAdvertisingService<ChatPeer>: PeerDataTransferService {
 
     var service: ServiceIdentifier { get }
     var advertisingState: ServiceState { get }

@@ -7,7 +7,7 @@
 
 import Observation
 
-protocol PeerDiscoveryService<ChatPeer>: PeerDataTransferService {
+public protocol PeerDiscoveryService<ChatPeer>: PeerDataTransferService {
 
     var service: ServiceIdentifier { get }
     var availablePeers: [ChatPeer] { get }

@@ -5,13 +5,13 @@
 //  Created by Henrik Panhans on 22.03.25.
 //
 
-enum ServiceState {
+public enum ServiceState {
 
     case active
     case inactive
     case error(any Error)
 
-    var isActive: Bool {
+    public var isActive: Bool {
         switch self {
         case .active:
             return true

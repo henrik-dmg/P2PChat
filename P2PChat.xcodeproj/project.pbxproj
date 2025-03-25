@@ -7,70 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		26014B352D9030E600E87831 /* ServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B342D9030E600E87831 /* ServiceType.swift */; };
-		26014B372D9034DA00E87831 /* MultipeerInformationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B362D9034D200E87831 /* MultipeerInformationService.swift */; };
-		26014B392D9034E700E87831 /* MultipeerAdvertisingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */; };
-		26014B3B2D9034F300E87831 /* MultipeerDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */; };
-		26014B3D2D9034FE00E87831 /* MultipeerDataTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */; };
-		26014B3F2D90351E00E87831 /* MultipeerPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26014B3E2D90351A00E87831 /* MultipeerPeer.swift */; };
+		26482DDD2D92D6F30059019C /* P2PKit in Frameworks */ = {isa = PBXBuildFile; productRef = 26482DDC2D92D6F30059019C /* P2PKit */; };
+		26482DDF2D92DED60059019C /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26482DDE2D92DED60059019C /* AsyncButton.swift */; };
 		266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */; };
 		266192672D7B2B8C00CFC6D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */; };
 		266192682D7B2B8C00CFC6D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 266192602D7B2B8C00CFC6D7 /* Assets.xcassets */; };
-		2661926B2D7B2BA700CFC6D7 /* Peer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2661926A2D7B2BA500CFC6D7 /* Peer.swift */; };
-		2661926D2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2661926C2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift */; };
-		2661926F2D7B3F8400CFC6D7 /* ServiceIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2661926E2D7B3F8400CFC6D7 /* ServiceIdentifier.swift */; };
-		266192712D7B401400CFC6D7 /* PeerDataTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192702D7B401400CFC6D7 /* PeerDataTransferService.swift */; };
 		266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192732D7B408400CFC6D7 /* ChatMessageHandler.swift */; };
 		266192762D7B422A00CFC6D7 /* ChatMessage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192752D7B422A00CFC6D7 /* ChatMessage.swift */; };
 		266192782D7B429100CFC6D7 /* ChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192772D7B429100CFC6D7 /* ChatView.swift */; };
 		2661927B2D7B45BF00CFC6D7 /* ServicePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2661927A2D7B45B400CFC6D7 /* ServicePickerView.swift */; };
-		2661927D2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2661927C2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift */; };
-		26634A0A2D9027B60018A8C4 /* NWConnection+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26634A092D9027B60018A8C4 /* NWConnection+Extensions.swift */; };
-		26634A0C2D902B8E0018A8C4 /* PeerAdvertisingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26634A0B2D902B8E0018A8C4 /* PeerAdvertisingService.swift */; };
-		26634A0E2D902BEB0018A8C4 /* BonjourDataTransferService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26634A0D2D902BEB0018A8C4 /* BonjourDataTransferService.swift */; };
-		26634A102D902BF50018A8C4 /* BonjourAdvertisingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26634A0F2D902BF50018A8C4 /* BonjourAdvertisingService.swift */; };
-		26634A142D902F3C0018A8C4 /* BonjourInformationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26634A132D902F350018A8C4 /* BonjourInformationService.swift */; };
-		267E07C02D8DB5A300D4B86E /* Identifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 267E07BF2D8DB5A300D4B86E /* Identifier.swift */; };
 		26CFD1992D8F023600C37775 /* PeerDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */; };
 		26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */; };
-		26CFD19D2D8F05BB00C37775 /* ServiceState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD19C2D8F05BB00C37775 /* ServiceState.swift */; };
-		26CFD19F2D8F0A3500C37775 /* PeerInformationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD19E2D8F0A3500C37775 /* PeerInformationService.swift */; };
-		26CFD1A32D8F0EF500C37775 /* BonjourPeer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD1A22D8F0EF500C37775 /* BonjourPeer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		26014B342D9030E600E87831 /* ServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceType.swift; sourceTree = "<group>"; };
-		26014B362D9034D200E87831 /* MultipeerInformationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerInformationService.swift; sourceTree = "<group>"; };
-		26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerAdvertisingService.swift; sourceTree = "<group>"; };
-		26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerDiscoveryService.swift; sourceTree = "<group>"; };
-		26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerDataTransferService.swift; sourceTree = "<group>"; };
-		26014B3E2D90351A00E87831 /* MultipeerPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultipeerPeer.swift; sourceTree = "<group>"; };
+		26482DDA2D92D6990059019C /* P2PKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = P2PKit; sourceTree = "<group>"; };
+		26482DDE2D92DED60059019C /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
 		2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		266192602D7B2B8C00CFC6D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		266192622D7B2B8C00CFC6D7 /* P2PChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PChat.entitlements; sourceTree = "<group>"; };
 		266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = P2PChatApp.swift; sourceTree = "<group>"; };
-		2661926A2D7B2BA500CFC6D7 /* Peer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Peer.swift; sourceTree = "<group>"; };
-		2661926C2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDiscoveryService.swift; sourceTree = "<group>"; };
-		2661926E2D7B3F8400CFC6D7 /* ServiceIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceIdentifier.swift; sourceTree = "<group>"; };
-		266192702D7B401400CFC6D7 /* PeerDataTransferService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDataTransferService.swift; sourceTree = "<group>"; };
 		266192732D7B408400CFC6D7 /* ChatMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessageHandler.swift; sourceTree = "<group>"; };
 		266192752D7B422A00CFC6D7 /* ChatMessage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatMessage.swift; sourceTree = "<group>"; };
 		266192772D7B429100CFC6D7 /* ChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatView.swift; sourceTree = "<group>"; };
 		2661927A2D7B45B400CFC6D7 /* ServicePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicePickerView.swift; sourceTree = "<group>"; };
-		2661927C2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDiscoveryService.swift; sourceTree = "<group>"; };
-		26634A092D9027B60018A8C4 /* NWConnection+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NWConnection+Extensions.swift"; sourceTree = "<group>"; };
-		26634A0B2D902B8E0018A8C4 /* PeerAdvertisingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerAdvertisingService.swift; sourceTree = "<group>"; };
-		26634A0D2D902BEB0018A8C4 /* BonjourDataTransferService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourDataTransferService.swift; sourceTree = "<group>"; };
-		26634A0F2D902BF50018A8C4 /* BonjourAdvertisingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourAdvertisingService.swift; sourceTree = "<group>"; };
-		26634A132D902F350018A8C4 /* BonjourInformationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourInformationService.swift; sourceTree = "<group>"; };
 		2677AF6E2D747BF500A64065 /* P2PChat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = P2PChat.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		267E07BF2D8DB5A300D4B86E /* Identifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Identifier.swift; sourceTree = "<group>"; };
 		267E07C42D8E224400D4B86E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDiscoveryView.swift; sourceTree = "<group>"; };
 		26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationRouter.swift; sourceTree = "<group>"; };
-		26CFD19C2D8F05BB00C37775 /* ServiceState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceState.swift; sourceTree = "<group>"; };
-		26CFD19E2D8F0A3500C37775 /* PeerInformationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerInformationService.swift; sourceTree = "<group>"; };
-		26CFD1A22D8F0EF500C37775 /* BonjourPeer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BonjourPeer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -78,12 +42,20 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				26482DDD2D92D6F30059019C /* P2PKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		26482DDB2D92D6F30059019C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		2661925F2D7B2B8C00CFC6D7 /* Preview Content */ = {
 			isa = PBXGroup;
 			children = (
@@ -100,36 +72,15 @@
 				266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */,
 				266192602D7B2B8C00CFC6D7 /* Assets.xcassets */,
 				266192722D7B406B00CFC6D7 /* Chat */,
-				26634A082D9027B20018A8C4 /* Extensions */,
-				266192692D7B2B9000CFC6D7 /* P2P */,
 				2661925F2D7B2B8C00CFC6D7 /* Preview Content */,
 				266192792D7B459500CFC6D7 /* UI */,
 			);
 			path = P2PChat;
 			sourceTree = "<group>";
 		};
-		266192692D7B2B9000CFC6D7 /* P2P */ = {
-			isa = PBXGroup;
-			children = (
-				2661926A2D7B2BA500CFC6D7 /* Peer.swift */,
-				26634A0B2D902B8E0018A8C4 /* PeerAdvertisingService.swift */,
-				266192702D7B401400CFC6D7 /* PeerDataTransferService.swift */,
-				2661926C2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift */,
-				26CFD19E2D8F0A3500C37775 /* PeerInformationService.swift */,
-				26CFD19C2D8F05BB00C37775 /* ServiceState.swift */,
-				2661926E2D7B3F8400CFC6D7 /* ServiceIdentifier.swift */,
-				267E07C22D8DB9EB00D4B86E /* Bluetooth */,
-				267E07C12D8DB9E200D4B86E /* Bonjour */,
-				267E07C32D8DB9F000D4B86E /* Multipeer */,
-				26014B342D9030E600E87831 /* ServiceType.swift */,
-			);
-			path = P2P;
-			sourceTree = "<group>";
-		};
 		266192722D7B406B00CFC6D7 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
-				267E07BF2D8DB5A300D4B86E /* Identifier.swift */,
 				266192752D7B422A00CFC6D7 /* ChatMessage.swift */,
 				266192732D7B408400CFC6D7 /* ChatMessageHandler.swift */,
 			);
@@ -139,6 +90,7 @@
 		266192792D7B459500CFC6D7 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				26482DDE2D92DED60059019C /* AsyncButton.swift */,
 				26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */,
 				26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */,
 				2661927A2D7B45B400CFC6D7 /* ServicePickerView.swift */,
@@ -147,18 +99,12 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
-		26634A082D9027B20018A8C4 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				26634A092D9027B60018A8C4 /* NWConnection+Extensions.swift */,
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
 		2677AF652D747BF400A64065 = {
 			isa = PBXGroup;
 			children = (
+				26482DDA2D92D6990059019C /* P2PKit */,
 				266192642D7B2B8C00CFC6D7 /* P2PChat */,
+				26482DDB2D92D6F30059019C /* Frameworks */,
 				2677AF6F2D747BF500A64065 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -169,37 +115,6 @@
 				2677AF6E2D747BF500A64065 /* P2PChat.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		267E07C12D8DB9E200D4B86E /* Bonjour */ = {
-			isa = PBXGroup;
-			children = (
-				26634A0F2D902BF50018A8C4 /* BonjourAdvertisingService.swift */,
-				26634A0D2D902BEB0018A8C4 /* BonjourDataTransferService.swift */,
-				2661927C2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift */,
-				26634A132D902F350018A8C4 /* BonjourInformationService.swift */,
-				26CFD1A22D8F0EF500C37775 /* BonjourPeer.swift */,
-			);
-			path = Bonjour;
-			sourceTree = "<group>";
-		};
-		267E07C22D8DB9EB00D4B86E /* Bluetooth */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Bluetooth;
-			sourceTree = "<group>";
-		};
-		267E07C32D8DB9F000D4B86E /* Multipeer */ = {
-			isa = PBXGroup;
-			children = (
-				26014B382D9034DF00E87831 /* MultipeerAdvertisingService.swift */,
-				26014B3C2D9034F600E87831 /* MultipeerDataTransferService.swift */,
-				26014B3A2D9034E900E87831 /* MultipeerDiscoveryService.swift */,
-				26014B362D9034D200E87831 /* MultipeerInformationService.swift */,
-				26014B3E2D90351A00E87831 /* MultipeerPeer.swift */,
-			);
-			path = Multipeer;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -219,6 +134,7 @@
 			);
 			name = P2PChat;
 			packageProductDependencies = (
+				26482DDC2D92D6F30059019C /* P2PKit */,
 			);
 			productName = P2PChat;
 			productReference = 2677AF6E2D747BF500A64065 /* P2PChat.app */;
@@ -277,33 +193,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26014B352D9030E600E87831 /* ServiceType.swift in Sources */,
-				2661926F2D7B3F8400CFC6D7 /* ServiceIdentifier.swift in Sources */,
 				266192762D7B422A00CFC6D7 /* ChatMessage.swift in Sources */,
 				2661927B2D7B45BF00CFC6D7 /* ServicePickerView.swift in Sources */,
-				26014B372D9034DA00E87831 /* MultipeerInformationService.swift in Sources */,
-				266192712D7B401400CFC6D7 /* PeerDataTransferService.swift in Sources */,
-				26634A0C2D902B8E0018A8C4 /* PeerAdvertisingService.swift in Sources */,
-				26634A0E2D902BEB0018A8C4 /* BonjourDataTransferService.swift in Sources */,
-				2661926B2D7B2BA700CFC6D7 /* Peer.swift in Sources */,
-				26014B3F2D90351E00E87831 /* MultipeerPeer.swift in Sources */,
 				266192782D7B429100CFC6D7 /* ChatView.swift in Sources */,
 				266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */,
-				26634A102D902BF50018A8C4 /* BonjourAdvertisingService.swift in Sources */,
 				26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */,
 				26CFD1992D8F023600C37775 /* PeerDiscoveryView.swift in Sources */,
-				2661927D2D7B49E100CFC6D7 /* BonjourDiscoveryService.swift in Sources */,
-				26014B3B2D9034F300E87831 /* MultipeerDiscoveryService.swift in Sources */,
-				2661926D2D7B3DD500CFC6D7 /* PeerDiscoveryService.swift in Sources */,
-				267E07C02D8DB5A300D4B86E /* Identifier.swift in Sources */,
+				26482DDF2D92DED60059019C /* AsyncButton.swift in Sources */,
 				266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */,
-				26634A142D902F3C0018A8C4 /* BonjourInformationService.swift in Sources */,
-				26CFD19F2D8F0A3500C37775 /* PeerInformationService.swift in Sources */,
-				26014B392D9034E700E87831 /* MultipeerAdvertisingService.swift in Sources */,
-				26014B3D2D9034FE00E87831 /* MultipeerDataTransferService.swift in Sources */,
-				26CFD1A32D8F0EF500C37775 /* BonjourPeer.swift in Sources */,
-				26CFD19D2D8F05BB00C37775 /* ServiceState.swift in Sources */,
-				26634A0A2D9027B60018A8C4 /* NWConnection+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -517,6 +414,13 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		26482DDC2D92D6F30059019C /* P2PKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = P2PKit;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2677AF662D747BF400A64065 /* Project object */;
 }

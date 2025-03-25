@@ -9,17 +9,13 @@ import SwiftUI
 import Network
 
 @Observable
-final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoveryService {
-
-    // MARK: - Nested Types
-
-    typealias ChatPeer = BonjourPeer
+public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoveryService {
 
     // MARK: - Properties
 
-    let service: ServiceIdentifier
-    private(set) var discoveryState: ServiceState = .inactive
-    private(set) var availablePeers = [ChatPeer]()
+    public let service: ServiceIdentifier
+    public private(set) var discoveryState: ServiceState = .inactive
+    public private(set) var availablePeers = [ChatPeer]()
 
     @ObservationIgnored
     private var browser: NWBrowser?
@@ -28,14 +24,14 @@ final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoverySe
 
     // MARK: - Init
 
-    init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier) {
         self.service = service
         super.init()
     }
 
     // MARK: - PeerDiscoveryService
 
-    func startDiscoveringPeers() {
+    public func startDiscoveringPeers() {
         guard browser == nil else {
             return // TODO: Throw error
         }
@@ -44,7 +40,7 @@ final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoverySe
         discoveryState = .active
     }
 
-    func stopDiscoveringPeers() {
+    public func stopDiscoveringPeers() {
         browser?.cancel()
         browser = nil
         availablePeers = []
@@ -69,20 +65,24 @@ final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoverySe
             }
         }
         browser.browseResultsChangedHandler = { [weak self] updated, changes in
-            print("browser results did change:")
+            print("Browser results changed:")
             for change in changes {
                 switch change {
                 case let .added(result):
-                    print("+ \(result.endpoint)")
                     let peer = BonjourPeer(endpoint: result.endpoint)
+                    print("+ \(peer.id)")
                     self?.availablePeers.append(peer)
                 case let .removed(result):
-                    print("- \(result.endpoint)")
+                    let peer = BonjourPeer(endpoint: result.endpoint)
+                    print("- \(peer.id)")
                     self?.availablePeers.removeAll { peer in
                         peer.endpoint == result.endpoint
                     }
                 case let .changed(old, new, flags):
-                    print("± \(old.endpoint) \(new.endpoint)")
+                    let oldPeer = BonjourPeer(endpoint: old.endpoint)
+                    let newPeer = BonjourPeer(endpoint: new.endpoint)
+
+                    print("± \(oldPeer.id) \(newPeer.id)")
                     print("± \(old.hashValue.description) \(new.hashValue.description)")
                     print("± \(flags)")
                     let peerIndex = self?.availablePeers.firstIndex { peer in
@@ -91,7 +91,7 @@ final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoverySe
                     guard let peerIndex else {
                         break
                     }
-                    self?.availablePeers[peerIndex] = BonjourPeer(endpoint: new.endpoint)
+                    self?.availablePeers[peerIndex] = newPeer
                 case .identical:
                     fallthrough
                 @unknown default:

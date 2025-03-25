@@ -9,11 +9,11 @@ import Foundation
 import Observation
 import MultipeerConnectivity
 
-class MultipeerDataTransferService: NSObject, PeerDataTransferService {
+public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
-    typealias ChatPeer = MultipeerPeer
+    public typealias ChatPeer = MultipeerPeer
 
     // MARK: - Properties
 
@@ -22,12 +22,12 @@ class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - PeerDataTransferService
 
-    func configure() async throws {}
+    public func configure() async throws {}
 
-    func connect(to peer: ChatPeer) async throws {}
+    public func connect(to peer: ChatPeer) async throws {}
 
-    func send(_ data: Data, to peer: ChatPeer) async throws {}
+    public func send(_ data: Data, to peer: ChatPeer) async throws {}
 
-    func disconnect(from peer: ChatPeer) {}
+    public func disconnect(from peer: ChatPeer) {}
 
 }

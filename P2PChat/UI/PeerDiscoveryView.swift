@@ -6,15 +6,28 @@
 //
 
 import SwiftUI
+import P2PKit
 
 struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
+
+    enum SheetContent: Identifiable {
+        case inspect(ChatPeer)
+        case chat(ChatPeer)
+
+        var id: ChatPeer.ID {
+            switch self {
+            case let .inspect(peer), let .chat(peer):
+                peer.id
+            }
+        }
+    }
 
     @State var discoveryService: any PeerDiscoveryService<ChatPeer>
     @State var advertisingService: any PeerAdvertisingService<ChatPeer>
     let peerInformationService: InformationService
 
     @State private var isSetupComplete = false
-    @State private var inspectedPeer: ChatPeer?
+    @State private var sheetContent: SheetContent?
 
     var body: some View {
         List {
@@ -55,20 +68,29 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
 
     @ViewBuilder
     private func peerCellView(_ peer: ChatPeer) -> some View {
-        NavigationLink {
-            ChatView(service: serviceToForward, peer: peer)
-        } label: {
-            peerInformationService.peerCellView(for: peer)
-        }.swipeActions {
+        peerInformationService.peerCellView(for: peer).swipeActions {
             Button {
-                inspectedPeer = peer
+                sheetContent = .chat(peer)
+            } label: {
+                Label("Info", systemImage: "bubble.fill")
+            }
+            .tint(.green)
+            Button {
+                sheetContent = .inspect(peer)
             } label: {
                 Label("Info", systemImage: "person.fill.questionmark")
             }
             .tint(.blue)
         }
-        .sheet(item: $inspectedPeer) { peer in
-            peerInformationService.peerInformationView(for: peer)
+        .sheet(item: $sheetContent) { content in
+            switch content {
+            case let .chat(peer):
+                NavigationView {
+                    ChatView(service: serviceToForward, peer: peer)
+                }
+            case let .inspect(peer):
+                peerInformationService.peerInformationView(for: peer)
+            }
         }
     }
 

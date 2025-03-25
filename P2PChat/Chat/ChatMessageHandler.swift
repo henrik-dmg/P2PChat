@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import P2PKit
 
 @Observable
 final class ChatMessageHandler<ChatPeer: Peer> {

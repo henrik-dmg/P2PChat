@@ -7,12 +7,12 @@
 
 import MultipeerConnectivity
 
-struct MultipeerPeer: Peer {
+public struct MultipeerPeer: Peer {
 
-    let identifier: MCPeerID
-    let info: [String : String]?
+    public let identifier: MCPeerID
+    public let info: [String : String]?
 
-    var id: String {
+    public var id: String {
         identifier.displayName
     }
 
