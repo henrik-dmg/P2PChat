@@ -14,62 +14,59 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 
     var chatMessages: [ChatMessage] = []
     var currentMessage = ""
-    var peer: ChatPeer?
-    var isConnected = false
+    let peer: ChatPeer
+    var isConnected: Bool
 
     @ObservationIgnored
     let transferService: any PeerDataTransferService<ChatPeer>
     @ObservationIgnored
     let encoder = JSONEncoder()
+    @ObservationIgnored
+    let decoder = JSONDecoder()
 
     init(peer: ChatPeer, transferService: any PeerDataTransferService<ChatPeer>) {
         self.peer = peer
         self.transferService = transferService
+        self.isConnected = true  // Let's believe in good faith here
         transferService.delegate = self
-    }
-
-    func connect() {
-        guard let peer else {
-            return
-        }
-        transferService.connect(to: peer) { [weak self] result in
-            switch result {
-            case .success:
-                self?.isConnected = true
-            case let .failure(error):
-                self?.isConnected = false
-                print(error)
-            }
-        }
-    }
-
-    func disconnect() {
-        guard let peer else {
-            return
-        }
-        transferService.disconnect(from: peer)
     }
 
     func sendMessage() async throws {
         guard !currentMessage.isEmpty else {
             return
         }
-        guard let peer else {
-            return
-        }
+        // TODO: Plugin local peerID here
         let chatMessage = ChatMessage(id: UUID(), date: .now, content: currentMessage, sender: "me", recipient: peer.id)
         let chatData = try encoder.encode(chatMessage)
-        try await transferService.send(chatData, to: peer)
+        try await transferService.send(chatData, to: peer.id)
         currentMessage = ""
         chatMessages.append(chatMessage)
+    }
+
+    func onDisappear() {
+        transferService.disconnect(from: peer.id)
     }
 
 }
 
 extension ChatMessageHandler: PeerDataTransferServiceDelegate {
 
+    func serviceReceived(data: Data, from peer: String) {
+        // TODO: Handle incomming messages here
+        do {
+            let message = try decoder.decode(ChatMessage.self, from: data)
+            chatMessages.append(message)
+        } catch {
+            print("Error decoding message:" + error.localizedDescription)
+        }
+    }
+
     func serviceDidDisconnectFromPeer(with id: String) {
         isConnected = false
+    }
+
+    func serviceDidConnectToPeer(with id: String) {
+        isConnected = true
     }
 
 }

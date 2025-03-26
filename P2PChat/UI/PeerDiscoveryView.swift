@@ -15,9 +15,11 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
         case inspect(ChatPeer)
         case chat(ChatPeer)
 
-        var id: ChatPeer.ID {
+        var id: String {
             switch self {
-            case let .inspect(peer), let .chat(peer):
+            case let .inspect(peer):
+                peer.id
+            case let .chat(peer):
                 peer.id
             }
         }
@@ -27,6 +29,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
 
     @State var service: any PeerDiscoveryService<ChatPeer>
     let peerInformationService: InformationService
+    @State private var isConnectingToPeer = false
 
     var body: some View {
         List {
@@ -42,25 +45,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 ForEach(service.availablePeers) { peer in
                     peerCellView(peer)
                 }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private func peerCellView(_ peer: ChatPeer) -> some View {
-        peerInformationService.peerCellView(for: peer).swipeActions {
-            Button {
-                sheetContent = .chat(peer)
-            } label: {
-                Label("Info", systemImage: "bubble.fill")
-            }
-            .tint(.green)
-            Button {
-                sheetContent = .inspect(peer)
-            } label: {
-                Label("Info", systemImage: "person.fill.questionmark")
-            }
-            .tint(.blue)
+            }.disabled(isConnectingToPeer)
         }
         .sheet(item: $sheetContent) { content in
             switch content {
@@ -71,6 +56,34 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
             case let .inspect(peer):
                 peerInformationService.peerInformationView(for: peer)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func peerCellView(_ peer: ChatPeer) -> some View {
+        peerInformationService.peerCellView(for: peer).swipeActions {
+            Button {
+                isConnectingToPeer = true
+                service.connect(to: peer) { result in
+                    print(result)
+                    switch result {
+                    case .success:
+                        sheetContent = .chat(peer)
+                    case let .failure(error):
+                        print(error)
+                    }
+                    isConnectingToPeer = false
+                }
+            } label: {
+                Label("Info", systemImage: "bubble.fill")
+            }
+            .tint(.green)
+            Button {
+                sheetContent = .inspect(peer)
+            } label: {
+                Label("Info", systemImage: "person.fill.questionmark")
+            }
+            .tint(.blue)
         }
     }
 

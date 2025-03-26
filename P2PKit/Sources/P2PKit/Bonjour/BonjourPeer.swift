@@ -19,11 +19,13 @@ public struct BonjourPeer: Peer {
         let interface: NWInterface?
     }
 
+    public typealias Phantom = String
+
     // MARK: - Properties
 
     public let endpoint: NWEndpoint
 
-    public var id: String {
+    public var id: ID {
         switch endpoint {
         case let .hostPort(host, port):
             "\(host):\(port)"

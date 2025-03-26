@@ -52,3 +52,19 @@ extension Identifier where Value == UUID {
     }
 
 }
+
+extension Identifier: ExpressibleByUnicodeScalarLiteral where Value: ExpressibleByStringLiteral {
+
+}
+
+extension Identifier: ExpressibleByExtendedGraphemeClusterLiteral where Value: ExpressibleByStringLiteral {
+
+}
+
+extension Identifier: ExpressibleByStringLiteral where Value: ExpressibleByStringLiteral {
+
+    public init(stringLiteral value: Value.StringLiteralType) {
+        self.id = .init(stringLiteral: value)
+    }
+
+}

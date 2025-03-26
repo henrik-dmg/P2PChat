@@ -29,6 +29,7 @@ struct ChatView<ChatPeer: Peer>: View {
                     }
                     if chatMessageHandler.chatMessages.isEmpty {
                         Text("No messages yet.")
+                            .font(.subheadline)
                     }
                 }
             }.defaultScrollAnchor(.bottom)
@@ -62,6 +63,9 @@ struct ChatView<ChatPeer: Peer>: View {
             } message: { errorDescription in
                 Text(errorDescription)
             }
+        }
+        .onDisappear {
+            chatMessageHandler.onDisappear()
         }
     }
 

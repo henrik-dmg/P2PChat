@@ -13,15 +13,17 @@ public class BonjourDataTransferService: PeerDataTransferService {
 
     // MARK: - Nested Types
 
+    public typealias PeerID = BonjourPeer.ID
     public typealias ChatPeer = BonjourPeer
     public typealias ConnectionState = NWConnection.State
 
     // MARK: - Properties
 
     public weak var delegate: PeerDataTransferServiceDelegate?
+    public private(set) var connectedPeers: [PeerID] = []
 
     @ObservationIgnored
-    public private(set) var connections: [ChatPeer.ID: NWConnection] = [:]
+    private var connections: [String: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
@@ -35,12 +37,16 @@ public class BonjourDataTransferService: PeerDataTransferService {
     }
 
     func connect(with connection: NWConnection, peerID: ChatPeer.ID, callback: @escaping (Result<Void, Error>) -> Void) {
+        guard connections[peerID] == nil else {
+            return  // Already connected to peer
+        }
         connection.stateUpdateHandler = { [weak self] newState in
             switch newState {
             case.ready:
                 print("Connection ready, starting receive")
+                self?.delegate?.serviceDidConnectToPeer(with: peerID)
                 callback(.success(()))
-                self?.receive(on: connection)
+                self?.receive(on: connection, peerID: peerID)
             case .failed(let error):
                 print("Connection error: \(error)")
                 callback(.failure(error))
@@ -56,18 +62,14 @@ public class BonjourDataTransferService: PeerDataTransferService {
         connections[peerID] = connection
     }
 
-    public func send(_ data: Data, to peer: ChatPeer) async throws {
-        guard let connection = connections[peer.id] else {
+    public func send(_ data: Data, to peerID: String) async throws {
+        guard let connection = connections[peerID] else {
             return
         }
         try await connection.sendData(data)
     }
 
-    public func disconnect(from peer: ChatPeer) {
-        disconnect(from: peer.id)
-    }
-
-    func disconnect(from peerID: ChatPeer.ID) {
+    public func disconnect(from peerID: ChatPeer.ID) {
         guard let connection = connections[peerID] else {
             return
         }
@@ -84,7 +86,7 @@ public class BonjourDataTransferService: PeerDataTransferService {
     // MARK: - Helpers
 
     // Receives messages continuously from a given connection
-    func receive(on connection: NWConnection) {
+    func receive(on connection: NWConnection, peerID: ChatPeer.ID) {
 //        connection.receiveMessage { [weak self] data, contentContext, isComplete, error in
 //            print("Receive callback called")
 //            if let error {
@@ -111,6 +113,7 @@ public class BonjourDataTransferService: PeerDataTransferService {
             if let data, !data.isEmpty {
                 if let message = String(data: data, encoding: .utf8) {
                     print("Received: \(message)")
+                    self?.delegate?.serviceReceived(data: data, from: peerID)
                 } else {
                     print("Received binary data: \(data)")
                 }
@@ -125,7 +128,7 @@ public class BonjourDataTransferService: PeerDataTransferService {
                 connection.cancel()
             } else {
                 // If no error and not complete, continue receiving
-                self?.receive(on: connection)
+                self?.receive(on: connection, peerID: peerID)
             }
         }
     }

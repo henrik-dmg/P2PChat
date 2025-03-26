@@ -18,6 +18,7 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Properties
 
+    public private(set) var connectedPeers: [ChatPeer.ID] = []
     public weak var delegate: PeerDataTransferServiceDelegate?
 
     @ObservationIgnored
@@ -29,9 +30,9 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     public func connect(to peer: ChatPeer, callback: @escaping (Result<Void, Error>) -> Void) {}
 
-    public func send(_ data: Data, to peer: ChatPeer) async throws {}
+    public func send(_ data: Data, to peerID: String) async throws {}
 
-    public func disconnect(from peer: ChatPeer) {}
+    public func disconnect(from peerID: String) {}
 
     public func disconnectAll() {}
 

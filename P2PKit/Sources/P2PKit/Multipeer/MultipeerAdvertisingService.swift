@@ -16,8 +16,17 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
     public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
 
+    private let peerID = MCPeerID(displayName: UIDevice.current.name)
+
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
+
+    @ObservationIgnored
+    private lazy var session: MCSession = {
+        let session = MCSession(peer: peerID, securityIdentity: nil, encryptionPreference: .none)
+        session.delegate = self
+        return session
+    }()
 
     // MARK: - Init
 
@@ -28,7 +37,7 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     // MARK: - PeerDiscoveryService
 
-    public func startAdvertisingService() {
+    public func startAdvertisingService(callback: @escaping Callback) {
         advertiser.startAdvertisingPeer()
         state = .active
     }
@@ -66,6 +75,30 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
     public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
         print("Advertiser did not start", error.localizedDescription)
         state = .error(error)
+    }
+
+}
+
+extension MultipeerAdvertisingService: MCSessionDelegate {
+
+    public func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+
+    }
+
+    public func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        
+    }
+
+    public func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
+
+    }
+
+    public func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+
+    }
+
+    public func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: (any Error)?) {
+
     }
 
 }
