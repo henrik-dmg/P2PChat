@@ -11,14 +11,10 @@ import Network
 @Observable
 public final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdvertisingService {
 
-    // MARK: - Nested Types
-
-    typealias ChatPeer = MultipeerPeer
-
     // MARK: - Properties
 
     public let service: ServiceIdentifier
-    public private(set) var advertisingState: ServiceState = .inactive
+    public private(set) var state: ServiceState = .inactive
 
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
@@ -34,12 +30,12 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     public func startAdvertisingService() {
         advertiser.startAdvertisingPeer()
-        advertisingState = .active
+        state = .active
     }
 
     public func stopAdvertisingService() {
         advertiser.stopAdvertisingPeer()
-        advertisingState = .inactive
+        state = .inactive
     }
 
     // MARK: - Helpers
@@ -69,7 +65,7 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
     
     public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
         print("Advertiser did not start", error.localizedDescription)
-        advertisingState = .error(error)
+        state = .error(error)
     }
 
 }

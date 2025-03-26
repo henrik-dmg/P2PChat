@@ -11,7 +11,7 @@ public protocol PeerDiscoveryService<ChatPeer>: PeerDataTransferService {
 
     var service: ServiceIdentifier { get }
     var availablePeers: [ChatPeer] { get }
-    var discoveryState: ServiceState { get }
+    var state: ServiceState { get }
 
     func startDiscoveringPeers()
     func stopDiscoveringPeers()

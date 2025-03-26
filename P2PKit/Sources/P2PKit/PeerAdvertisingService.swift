@@ -10,7 +10,7 @@ import Observation
 public protocol PeerAdvertisingService<ChatPeer>: PeerDataTransferService {
 
     var service: ServiceIdentifier { get }
-    var advertisingState: ServiceState { get }
+    var state: ServiceState { get }
 
     func startAdvertisingService()
     func stopAdvertisingService()

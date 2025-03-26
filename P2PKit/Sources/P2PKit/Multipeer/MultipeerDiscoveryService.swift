@@ -14,7 +14,7 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
     // MARK: - Properties
 
     public let service: ServiceIdentifier
-    public private(set) var discoveryState: ServiceState = .inactive
+    public private(set) var state: ServiceState = .inactive
     public private(set) var availablePeers = [ChatPeer]()
 
     @ObservationIgnored
@@ -31,13 +31,13 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     public func startDiscoveringPeers() {
         browser.startBrowsingForPeers()
-        discoveryState = .active
+        state = .active
     }
 
     public func stopDiscoveringPeers() {
         browser.stopBrowsingForPeers()
         availablePeers = []
-        discoveryState = .inactive
+        state = .inactive
     }
 
     // MARK: - Helpers

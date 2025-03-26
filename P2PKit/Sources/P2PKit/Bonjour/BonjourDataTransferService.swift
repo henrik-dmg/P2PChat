@@ -14,11 +14,14 @@ public class BonjourDataTransferService: PeerDataTransferService {
     // MARK: - Nested Types
 
     public typealias ChatPeer = BonjourPeer
+    public typealias ConnectionState = NWConnection.State
 
     // MARK: - Properties
 
+    public weak var delegate: PeerDataTransferServiceDelegate?
+
     @ObservationIgnored
-    var connections: [ChatPeer.ID: NWConnection] = [:]
+    public private(set) var connections: [ChatPeer.ID: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
@@ -26,21 +29,25 @@ public class BonjourDataTransferService: PeerDataTransferService {
 
     open func configure() async throws {}
 
-    public func connect(to peer: ChatPeer) {
+    public func connect(to peer: BonjourPeer, callback: @escaping (Result<Void, Error>) -> Void) {
         let connection = NWConnection(to: peer.endpoint, using: .tcp)
-        connect(with: connection, peerID: peer.id)
+        connect(with: connection, peerID: peer.id, callback: callback)
     }
 
-    func connect(with connection: NWConnection, peerID: ChatPeer.ID) {
+    func connect(with connection: NWConnection, peerID: ChatPeer.ID, callback: @escaping (Result<Void, Error>) -> Void) {
         connection.stateUpdateHandler = { [weak self] newState in
             switch newState {
             case.ready:
                 print("Connection ready, starting receive")
+                callback(.success(()))
                 self?.receive(on: connection)
             case .failed(let error):
                 print("Connection error: \(error)")
+                callback(.failure(error))
+                self?.disconnect(from: peerID)
             case .cancelled:
                 print("Connection was stopped")
+                self?.delegate?.serviceDidDisconnectFromPeer(with: peerID)
             default:
                 print(newState)
             }
@@ -68,7 +75,7 @@ public class BonjourDataTransferService: PeerDataTransferService {
         connections[peerID] = nil
     }
 
-    func disconnectAll() {
+    public func disconnectAll() {
         for id in connections.keys {
             disconnect(from: id)
         }

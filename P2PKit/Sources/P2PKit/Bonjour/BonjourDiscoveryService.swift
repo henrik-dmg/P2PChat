@@ -14,7 +14,7 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
     // MARK: - Properties
 
     public let service: ServiceIdentifier
-    public private(set) var discoveryState: ServiceState = .inactive
+    public private(set) var state: ServiceState = .inactive
     public private(set) var availablePeers = [ChatPeer]()
 
     @ObservationIgnored
@@ -37,14 +37,14 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
         }
         browser = makeBrowser()
         browser?.start(queue: browserQueue)
-        discoveryState = .active
+        state = .active
     }
 
     public func stopDiscoveringPeers() {
         browser?.cancel()
         browser = nil
         availablePeers = []
-        discoveryState = .inactive
+        state = .inactive
     }
 
     // MARK: - Helpers

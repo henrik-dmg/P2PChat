@@ -7,6 +7,7 @@
 
 import SwiftUI
 import P2PKit
+import Observation
 
 struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
@@ -22,46 +23,25 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
         }
     }
 
-    @State var discoveryService: any PeerDiscoveryService<ChatPeer>
-    @State var advertisingService: any PeerAdvertisingService<ChatPeer>
-    let peerInformationService: InformationService
-
-    @State private var isSetupComplete = false
     @State private var sheetContent: SheetContent?
+
+    @State var service: any PeerDiscoveryService<ChatPeer>
+    let peerInformationService: InformationService
 
     var body: some View {
         List {
-            Section("Advertise") {
-                LabeledContent("Service advertised", value: advertisingService.advertisingState.isActive ? "Yes" : "No")
-                Button(advertisingService.advertisingState.isActive ? "Stop service" : "Start service") {
-                    if advertisingService.advertisingState.isActive {
-                        advertisingService.stopAdvertisingService()
+            Section("Discovery") {
+                LabeledContent("Discovery peers", value: service.state.isActive ? "Yes" : "No")
+                Button(service.state.isActive ? "Stop discovering" : "Start discovering") {
+                    if service.state.isActive {
+                        service.stopDiscoveringPeers()
                     } else {
-                        advertisingService.startAdvertisingService()
+                        service.startDiscoveringPeers()
                     }
-                }.disabled(!isSetupComplete || discoveryService.discoveryState.isActive)
-            }
-            Section("Browsing") {
-                LabeledContent("Browsing for peers", value: discoveryService.discoveryState.isActive ? "Yes" : "No")
-                Button(discoveryService.discoveryState.isActive ? "Stop browsing" : "Start browsing") {
-                    if discoveryService.discoveryState.isActive {
-                        discoveryService.stopDiscoveringPeers()
-                    } else {
-                        discoveryService.startDiscoveringPeers()
-                    }
-                }.disabled(!isSetupComplete || advertisingService.advertisingState.isActive)
-                ForEach(discoveryService.availablePeers) { peer in
+                }
+                ForEach(service.availablePeers) { peer in
                     peerCellView(peer)
                 }
-            }
-        }.task {
-            do {
-                try await advertisingService.configure()
-                try await discoveryService.configure()
-                isSetupComplete = true
-            } catch {
-                print(error)
-                isSetupComplete = false
             }
         }
     }
@@ -86,7 +66,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
             switch content {
             case let .chat(peer):
                 NavigationView {
-                    ChatView(service: serviceToForward, peer: peer)
+                    ChatView(service: service, peer: peer)
                 }
             case let .inspect(peer):
                 peerInformationService.peerInformationView(for: peer)
@@ -94,14 +74,5 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
         }
     }
 
-    private var serviceToForward: any PeerDataTransferService<ChatPeer> {
-        if advertisingService.advertisingState.isActive {
-            return advertisingService
-        }
-        if discoveryService.discoveryState.isActive, advertisingService.advertisingState.isActive {
-            fatalError("Cant be listener and server simultaneously")
-        }
-        return discoveryService
-    }
 
 }

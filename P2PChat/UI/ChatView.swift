@@ -12,6 +12,10 @@ struct ChatView<ChatPeer: Peer>: View {
 
     @State private var chatMessageHandler: ChatMessageHandler<ChatPeer>
 
+    @State private var isPresentingAlert = false
+    @State private var errorDescription: String?
+    @Environment(\.dismiss) private var dismiss
+
     init(service: any PeerDataTransferService<ChatPeer>, peer: ChatPeer) {
         self.chatMessageHandler = ChatMessageHandler(peer: peer, transferService: service)
     }
@@ -36,18 +40,27 @@ struct ChatView<ChatPeer: Peer>: View {
                         try await chatMessageHandler.sendMessage()
                     } catch {
                         print("Sending failed, show error in UI", error)
+                        errorDescription = error.localizedDescription
                     }
                 } label: {
                     Label("Send", systemImage: "paperplane")
-                }
+                }.disabled(!chatMessageHandler.isConnected)
             }
             .padding()
             .background(.regularMaterial)
-        }.task {
-            do {
-                try await chatMessageHandler.connect()
-            } catch {
-                print(error.localizedDescription)
+            .alert("Error", isPresented: $isPresentingAlert, presenting: errorDescription) { error in
+                AsyncButton {
+                    do {
+                        try await chatMessageHandler.sendMessage()
+                    } catch {
+                        print("Sending failed, show error in UI", error)
+                        errorDescription = error.localizedDescription
+                    }
+                } label: {
+                    Label("Retry", systemImage: "paperplane")
+                }
+            } message: { errorDescription in
+                Text(errorDescription)
             }
         }
     }

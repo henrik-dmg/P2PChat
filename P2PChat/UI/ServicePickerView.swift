@@ -40,16 +40,16 @@ struct ServicePickerView: View {
         case .bluetooth:
             Text("Bluetooth not supported yet")
         case .bonjour:
-            PeerDiscoveryView(
+            PeerPickerView(
                 discoveryService: BonjourDiscoveryService(service: Constants.serviceIdentifier),
                 advertisingService: BonjourAdvertisingService(service: Constants.serviceIdentifier),
-                peerInformationService: BonjourInformationService()
+                informationService: BonjourInformationService()
             )
         case .multipeer:
-            PeerDiscoveryView(
-                discoveryService: MultipeerDiscoveryService(service: ServiceIdentifier("p2p-multipeer")),
-                advertisingService: MultipeerAdvertisingService(service: ServiceIdentifier("p2p-multipeer")),
-                peerInformationService: MultipeerInformationService()
+            PeerPickerView(
+                discoveryService: MultipeerDiscoveryService(service: Constants.serviceIdentifier),
+                advertisingService: MultipeerAdvertisingService(service: Constants.serviceIdentifier),
+                informationService: MultipeerInformationService()
             )
         }
     }

@@ -12,14 +12,10 @@ import Network
 @Observable
 public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
 
-    // MARK: - Nested Types
-
-    typealias ChatPeer = BonjourPeer
-
     // MARK: - Properties
 
     public let service: ServiceIdentifier
-    public private(set) var advertisingState: ServiceState = .inactive
+    public private(set) var state: ServiceState = .inactive
 
     @ObservationIgnored
     private var listener: NWListener?
@@ -43,14 +39,14 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
             listener = try makeListener()
             listener?.start(queue: listenerQueue)
         } catch {
-            advertisingState = .error(error)
+            state = .error(error)
         }
     }
 
     public func stopAdvertisingService() {
         listener?.cancel()
         listener = nil
-        advertisingState = .inactive
+        state = .inactive
     }
 
     // MARK: - Helpers
@@ -75,7 +71,9 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
         listener.newConnectionHandler = { [weak self]  connection in
             print("New connection", connection, connection.state)
             let peer = BonjourPeer(endpoint: connection.endpoint)
-            self?.connect(with: connection, peerID: peer.id)
+            self?.connect(with: connection, peerID: peer.id) { result in
+                print(result)
+            }
         }
         listener.newConnectionLimit = 1
 
@@ -83,9 +81,9 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
             print("Registration state changed:", registrationState)
             switch registrationState {
             case .add:
-                self?.advertisingState = .active
+                self?.state = .active
             case .remove:
-                self?.advertisingState = .inactive
+                self?.state = .inactive
             @unknown default:
                 print("Unknown service registration state")
             }
