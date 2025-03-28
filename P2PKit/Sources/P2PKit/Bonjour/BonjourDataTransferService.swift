@@ -9,34 +9,42 @@ import Foundation
 import Observation
 import Network
 
-public class BonjourDataTransferService: PeerDataTransferService {
+@Observable
+public class BonjourDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
-    public typealias PeerID = BonjourPeer.ID
     public typealias ChatPeer = BonjourPeer
     public typealias ConnectionState = NWConnection.State
 
     // MARK: - Properties
 
-    public weak var delegate: PeerDataTransferServiceDelegate?
+    public let ownPeerID: PeerID
     public private(set) var connectedPeers: [PeerID] = []
+    public weak var delegate: PeerDataTransferServiceDelegate?
 
     @ObservationIgnored
-    private var connections: [String: NWConnection] = [:]
+    private var connections: [PeerID: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
+
+    // MARK: - Init
+
+    init(ownPeerID: PeerID) {
+        self.ownPeerID = ownPeerID
+        super.init()
+    }
 
     // MARK: - PeerDataTransferService
 
     open func configure() async throws {}
 
-    public func connect(to peer: BonjourPeer, callback: @escaping (Result<Void, Error>) -> Void) {
+    public func connect(to peer: BonjourPeer) {
         let connection = NWConnection(to: peer.endpoint, using: .tcp)
-        connect(with: connection, peerID: peer.id, callback: callback)
+        connect(with: connection, peerID: peer.id)
     }
 
-    func connect(with connection: NWConnection, peerID: ChatPeer.ID, callback: @escaping (Result<Void, Error>) -> Void) {
+    func connect(with connection: NWConnection, peerID: ChatPeer.ID) {
         guard connections[peerID] == nil else {
             return  // Already connected to peer
         }
@@ -45,21 +53,20 @@ public class BonjourDataTransferService: PeerDataTransferService {
             case.ready:
                 print("Connection ready, starting receive")
                 self?.delegate?.serviceDidConnectToPeer(with: peerID)
-                callback(.success(()))
                 self?.receive(on: connection, peerID: peerID)
             case .failed(let error):
                 print("Connection error: \(error)")
-                callback(.failure(error))
                 self?.disconnect(from: peerID)
             case .cancelled:
                 print("Connection was stopped")
-                self?.delegate?.serviceDidDisconnectFromPeer(with: peerID)
+                self?.disconnect(from: peerID)
             default:
                 print(newState)
             }
         }
         connection.start(queue: connectionsQueue)
         connections[peerID] = connection
+        connectedPeers.append(peerID)
     }
 
     public func send(_ data: Data, to peerID: String) async throws {
@@ -75,6 +82,8 @@ public class BonjourDataTransferService: PeerDataTransferService {
         }
         connection.cancel()
         connections[peerID] = nil
+        connectedPeers.removeAll(where: { $0 == peerID })
+        delegate?.serviceDidDisconnectFromPeer(with: peerID)
     }
 
     public func disconnectAll() {
@@ -87,26 +96,6 @@ public class BonjourDataTransferService: PeerDataTransferService {
 
     // Receives messages continuously from a given connection
     func receive(on connection: NWConnection, peerID: ChatPeer.ID) {
-//        connection.receiveMessage { [weak self] data, contentContext, isComplete, error in
-//            print("Receive callback called")
-//            if let error {
-//                print("Receive error: \(error)")
-//                //                self?.removeConnection(connection)
-//                return
-//            }
-//
-//            if let data, !data.isEmpty {
-//                if let message = String(data: data, encoding: .utf8) {
-//                    print("Received message: \(message)")
-//                } else {
-//                    print("Received non-UTF8 data: \(data)")
-//                }
-//            }
-//
-//            // Continue receiving messages
-//            self?.receive(on: connection)
-//        }
-
         connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
             print("Receive callback called")
             // Check if data was received

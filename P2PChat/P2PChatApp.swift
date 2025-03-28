@@ -11,12 +11,14 @@ import SwiftUI
 struct P2PChatApp: App {
 
     @State private var router = NavigationRouter()
+    @State private var settings = Settings()
 
     var body: some Scene {
         WindowGroup {
             NavigationStack(path: $router.path) {
                 router.rootView()
             }
+            .environment(settings)
         }
     }
 

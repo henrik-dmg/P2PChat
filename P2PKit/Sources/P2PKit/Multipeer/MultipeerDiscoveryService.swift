@@ -22,9 +22,9 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     // MARK: - Init
 
-    public init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
         self.service = service
-        super.init()
+        super.init(ownPeerID: ownPeerID)
     }
 
     // MARK: - PeerDiscoveryService
@@ -40,10 +40,16 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
         state = .inactive
     }
 
+    // MARK: - Overridden Methods
+
+    public override func connect(to peer: ChatPeer) {
+        browser.invitePeer(peer.identifier, to: session, withContext: nil, timeout: 10)
+    }
+
     // MARK: - Helpers
 
     private func makeBrowser() -> MCNearbyServiceBrowser {
-        let browser = MCNearbyServiceBrowser(peer: MCPeerID(displayName: UIDevice.current.name), serviceType: service.rawValue)
+        let browser = MCNearbyServiceBrowser(peer: session.myPeerID, serviceType: service.rawValue)
         browser.delegate = self
         return browser
     }
@@ -62,6 +68,11 @@ extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
         availablePeers.removeAll { peer in
             peer.identifier == peerID
         }
+    }
+
+    public func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: any Error) {
+        print("Browser did not start browsing for peers: \(error)")
+        state = .error(error)
     }
 
 }

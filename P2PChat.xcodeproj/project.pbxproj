@@ -20,6 +20,10 @@
 		266328862D94B352008A3F55 /* PeerAdvertisingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266328852D94B352008A3F55 /* PeerAdvertisingView.swift */; };
 		26CFD1992D8F023600C37775 /* PeerDiscoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */; };
 		26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */; };
+		26F356092D9565F800496DAF /* NameOnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F356082D9565F800496DAF /* NameOnboardingView.swift */; };
+		26F3560B2D9565FF00496DAF /* NavigationDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F3560A2D9565FF00496DAF /* NavigationDestination.swift */; };
+		26F3560E2D95675600496DAF /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F3560D2D95675600496DAF /* Constants.swift */; };
+		26F356112D95680F00496DAF /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26F356102D95680F00496DAF /* Settings.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +43,10 @@
 		267E07C42D8E224400D4B86E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerDiscoveryView.swift; sourceTree = "<group>"; };
 		26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationRouter.swift; sourceTree = "<group>"; };
+		26F356082D9565F800496DAF /* NameOnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NameOnboardingView.swift; sourceTree = "<group>"; };
+		26F3560A2D9565FF00496DAF /* NavigationDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationDestination.swift; sourceTree = "<group>"; };
+		26F3560D2D95675600496DAF /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
+		26F356102D95680F00496DAF /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +84,7 @@
 				266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */,
 				266192602D7B2B8C00CFC6D7 /* Assets.xcassets */,
 				266192722D7B406B00CFC6D7 /* Chat */,
+				26F3560F2D9567F100496DAF /* Helpers */,
 				2661925F2D7B2B8C00CFC6D7 /* Preview Content */,
 				266192792D7B459500CFC6D7 /* UI */,
 			);
@@ -96,11 +105,12 @@
 			children = (
 				26482DDE2D92DED60059019C /* AsyncButton.swift */,
 				266192772D7B429100CFC6D7 /* ChatView.swift */,
-				26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */,
+				26F356082D9565F800496DAF /* NameOnboardingView.swift */,
 				266328852D94B352008A3F55 /* PeerAdvertisingView.swift */,
 				26CFD1982D8F023600C37775 /* PeerDiscoveryView.swift */,
 				266328832D94B327008A3F55 /* PeerPickerView.swift */,
 				2661927A2D7B45B400CFC6D7 /* ServicePickerView.swift */,
+				26F3560C2D95660900496DAF /* Navigation */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -121,6 +131,24 @@
 				2677AF6E2D747BF500A64065 /* P2PChat.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		26F3560C2D95660900496DAF /* Navigation */ = {
+			isa = PBXGroup;
+			children = (
+				26F3560A2D9565FF00496DAF /* NavigationDestination.swift */,
+				26CFD19A2D8F028F00C37775 /* NavigationRouter.swift */,
+			);
+			path = Navigation;
+			sourceTree = "<group>";
+		};
+		26F3560F2D9567F100496DAF /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				26F3560D2D95675600496DAF /* Constants.swift */,
+				26F356102D95680F00496DAF /* Settings.swift */,
+			);
+			path = Helpers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -200,10 +228,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				266192762D7B422A00CFC6D7 /* ChatMessage.swift in Sources */,
+				26F356092D9565F800496DAF /* NameOnboardingView.swift in Sources */,
 				266328862D94B352008A3F55 /* PeerAdvertisingView.swift in Sources */,
 				266328842D94B327008A3F55 /* PeerPickerView.swift in Sources */,
+				26F356112D95680F00496DAF /* Settings.swift in Sources */,
+				26F3560B2D9565FF00496DAF /* NavigationDestination.swift in Sources */,
 				2661927B2D7B45BF00CFC6D7 /* ServicePickerView.swift in Sources */,
 				266192782D7B429100CFC6D7 /* ChatView.swift in Sources */,
+				26F3560E2D95675600496DAF /* Constants.swift in Sources */,
 				266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */,
 				26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */,
 				26CFD1992D8F023600C37775 /* PeerDiscoveryView.swift in Sources */,

@@ -24,9 +24,9 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
 
     // MARK: - Init
 
-    public init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
         self.service = service
-        super.init()
+        super.init(ownPeerID: ownPeerID)
     }
 
     // MARK: - PeerDiscoveryService

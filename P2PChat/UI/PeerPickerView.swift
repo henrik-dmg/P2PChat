@@ -17,10 +17,10 @@ struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService
     var body: some View {
         List {
             NavigationLink("Advertise service") {
-                PeerAdvertisingView(service: advertisingService)
+                PeerAdvertisingView(service: advertisingService, informationService: informationService)
             }
             NavigationLink("Discover peers") {
-                PeerDiscoveryView(service: discoveryService, peerInformationService: informationService)
+                PeerDiscoveryView(service: discoveryService, informationService: informationService)
             }
         }
     }
@@ -29,8 +29,8 @@ struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService
 #Preview {
     NavigationStack {
         PeerPickerView(
-            discoveryService: BonjourDiscoveryService(service: Constants.serviceIdentifier),
-            advertisingService: BonjourAdvertisingService(service: Constants.serviceIdentifier),
+            discoveryService: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: "test2"),
+            advertisingService: BonjourAdvertisingService(service: .bonjourIdentifier, ownPeerID: "test2"),
             informationService: BonjourInformationService()
         )
     }

@@ -11,14 +11,17 @@ import Observation
 public protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
 
     associatedtype ChatPeer: Peer
+    typealias PeerID = ChatPeer.ID
 
+    var ownPeerID: PeerID { get }
+    var connectedPeers: [PeerID] { get }
     var delegate: PeerDataTransferServiceDelegate? { get set }
 
     func configure() async throws
 
-    func connect(to peer: ChatPeer, callback: @escaping (Result<Void, Error>) -> Void)
-    func send(_ data: Data, to peerID: String) async throws
-    func disconnect(from peerID: String)
+    func connect(to peer: ChatPeer)
+    func send(_ data: Data, to peerID: PeerID) async throws
+    func disconnect(from peerID: PeerID)
     func disconnectAll()
 
 }

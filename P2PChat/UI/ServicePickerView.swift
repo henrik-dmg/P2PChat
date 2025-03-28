@@ -8,49 +8,36 @@
 import SwiftUI
 import P2PKit
 
-enum Constants {
-    static let serviceIdentifier = ServiceIdentifier("_p2p._tcp")
-}
-
 struct ServicePickerView: View {
 
+    @Environment(NavigationRouter.self) var router
+    @Environment(Settings.self) var settings
+
+    @State private var isPresentingNamePicker = false
+
     var body: some View {
-        NavigationStack {
-            List {
-                NavigationLink(value: ServiceType.bluetooth) {
-                    Label("Bluetooth", systemImage: "personalhotspot")
-                }
-                NavigationLink(value: ServiceType.bonjour) {
-                    Label("Bonjour", systemImage: "bonjour")
-                }
-                NavigationLink(value: ServiceType.multipeer) {
-                    Label("Multipeer", systemImage: "wifi")
-                }
+        List {
+            NavigationLink(value: NavigationDestination.peerPicker(.bluetooth, settings.name)) {
+                Label("Bluetooth", systemImage: "personalhotspot")
             }
-            .navigationTitle("P2P Services")
-            .navigationDestination(for: ServiceType.self) { service in
-                makeServiceDestinationView(service)
+            NavigationLink(value: NavigationDestination.peerPicker(.bonjour, settings.name)) {
+                Label("Bonjour", systemImage: "bonjour")
+            }
+            NavigationLink(value: NavigationDestination.peerPicker(.multipeer, settings.name)) {
+                Label("Multipeer", systemImage: "wifi")
             }
         }
-    }
-
-    @ViewBuilder
-    private func makeServiceDestinationView(_ service: ServiceType) -> some View {
-        switch service {
-        case .bluetooth:
-            Text("Bluetooth not supported yet")
-        case .bonjour:
-            PeerPickerView(
-                discoveryService: BonjourDiscoveryService(service: Constants.serviceIdentifier),
-                advertisingService: BonjourAdvertisingService(service: Constants.serviceIdentifier),
-                informationService: BonjourInformationService()
-            )
-        case .multipeer:
-            PeerPickerView(
-                discoveryService: MultipeerDiscoveryService(service: Constants.serviceIdentifier),
-                advertisingService: MultipeerAdvertisingService(service: Constants.serviceIdentifier),
-                informationService: MultipeerInformationService()
-            )
+        .sheet(isPresented: $isPresentingNamePicker) {
+            NavigationStack {
+                NameOnboardingView()
+            }
+        }
+        .navigationTitle("P2P Services")
+        .onAppear {
+            guard !settings.isNameValid(settings.name) else {
+                return
+            }
+            isPresentingNamePicker = true
         }
     }
 

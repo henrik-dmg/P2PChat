@@ -24,19 +24,19 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     // MARK: - Init
 
-    public init(service: ServiceIdentifier) {
+    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
         self.service = service
-        super.init()
+        super.init(ownPeerID: ownPeerID)
     }
 
     // MARK: - PeerDiscoveryService
 
-    public func startAdvertisingService(callback: @escaping (Result<[ChatPeer], any Error>) -> Void) {
+    public func startAdvertisingService() {
         guard listener == nil else {
             return // TODO: Throw error
         }
         do {
-            listener = try makeListener(callback: callback)
+            listener = try makeListener()
             listener?.start(queue: listenerQueue)
         } catch {
             state = .error(error)
@@ -51,7 +51,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     // MARK: - Helpers
 
-    func makeListener(callback: @escaping Callback) throws -> NWListener {
+    func makeListener() throws -> NWListener {
         let service = NWListener.Service(name: "P2P Chat Service", type: service.rawValue)
         let listener = try NWListener(service: service, using: .tcp)
         listener.stateUpdateHandler = { [weak self] newState in
@@ -71,14 +71,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
         listener.newConnectionHandler = { [weak self]  connection in
             print("New connection", connection, connection.state)
             let peer = BonjourPeer(endpoint: connection.endpoint)
-            self?.connect(with: connection, peerID: peer.id) { result in
-                switch result {
-                case .success:
-                    callback(.success([peer]))
-                case .failure(let error):
-                    callback(.failure(error))
-                }
-            }
+            self?.connect(with: connection, peerID: peer.id)
         }
         listener.newConnectionLimit = 1
 

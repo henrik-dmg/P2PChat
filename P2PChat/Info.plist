@@ -4,7 +4,8 @@
 <dict>
 	<key>NSBonjourServices</key>
 	<array>
-		<string>_p2p._tcp</string>
+		<string>_p2pchat._tcp</string>
+		<string>_p2pchat._udp</string>
 	</array>
 </dict>
 </plist>
