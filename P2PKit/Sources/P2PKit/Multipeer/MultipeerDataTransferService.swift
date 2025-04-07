@@ -8,6 +8,7 @@
 import Foundation
 import MultipeerConnectivity
 import Observation
+import OSLog
 
 @Observable
 public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
@@ -20,15 +21,18 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
     // MARK: - Properties
 
     public let ownPeerID: PeerID
-    public private(set) var connectedPeers: [PeerID] = []
+    public var connectedPeers: [PeerID] {
+        Array(connections.keys)
+    }
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    @ObservationIgnored
-    public private(set) var connections: [PeerID: MCPeerID] = [:]
+    private var connections: [PeerID: MCPeerID] = [:]
     @ObservationIgnored
     lazy var session = makeSession()
     @ObservationIgnored
     lazy var ownMCPeerID = MCPeerID(displayName: ownPeerID)
+
+    let logger = Logger.multipeer
 
     // MARK: - Init
 
@@ -39,16 +43,14 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - PeerDataTransferService
 
-    public func configure() async throws {}
-
     public func connect(to peer: ChatPeer) {
         session.nearbyConnectionData(forPeer: peer.identifier) { [weak self] data, error in
             if let error {
-                print("Error fetching nearby connection data: \(error)")
+                self?.logger.error("Error fetching nearby connection data for peer \(peer.identifier): \(error)")
                 return
             }
             guard let data else {
-                print("No error but no data either")
+                self?.logger.error("No error but no data either")
                 return
             }
             self?.session.connectPeer(peer.identifier, withNearbyConnectionData: data)
@@ -57,15 +59,15 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     public func send(_ data: Data, to peerID: PeerID) async throws {
         guard let storedPeerID = connections[peerID] else {
-            print("No stored peerID for \(peerID)")
+            logger.warning("No stored peerID for \(peerID)")
             return
         }
         guard session.connectedPeers.contains(storedPeerID) else {
-            print("Stored peer \(storedPeerID) not connected")
+            logger.warning("Stored peer \(storedPeerID) not connected")
             return
         }
         try session.send(data, toPeers: [storedPeerID], with: .reliable)
-        print("Successfully sent data to peer \(peerID)")
+        logger.info("Successfully sent data to peer \(peerID)")
     }
 
     public func disconnect(from peerID: PeerID) {
@@ -89,31 +91,31 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 extension MultipeerDataTransferService: MCSessionDelegate {
 
     public func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        connectedPeers = session.connectedPeers.map { $0.displayName }
+        //connectedPeers = session.connectedPeers.map { $0.displayName }
 
         switch state {
         case .notConnected:
             connections[peerID.displayName] = nil
             delegate?.serviceDidDisconnectFromPeer(with: peerID.displayName)
-            print("Peer \(peerID) disconnected")
+            logger.info("Peer \(peerID) disconnected")
         case .connecting:
-            print("Peer \(peerID) connecting")
+            logger.info("Peer \(peerID) connecting")
         case .connected:
             connections[peerID.displayName] = peerID
             delegate?.serviceDidConnectToPeer(with: peerID.displayName)
-            print("Peer \(peerID) connected")
+            logger.info("Peer \(peerID) connected")
         @unknown default:
-            print(state)
+            logger.warning("Unknown connection state: \(String(describing: state))")
         }
     }
 
     public func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         delegate?.serviceReceived(data: data, from: peerID.displayName)
-        print("Received data from \(peerID)")
+        logger.info("Received data from \(peerID)")
     }
 
     public func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
-        print("Session did receive stream")
+        logger.info("Session did receive stream")
     }
 
     public func session(
@@ -122,7 +124,7 @@ extension MultipeerDataTransferService: MCSessionDelegate {
         fromPeer peerID: MCPeerID,
         with progress: Progress
     ) {
-        print("Session did receiving resource with name \(resourceName)")
+        logger.info("Session did receiving resource with name \(resourceName)")
     }
 
     public func session(
@@ -132,7 +134,7 @@ extension MultipeerDataTransferService: MCSessionDelegate {
         at localURL: URL?,
         withError error: (any Error)?
     ) {
-        print("Session did finish receiving resource with name \(resourceName)")
+        logger.info("Session did finish receiving resource with name \(resourceName)")
     }
 
 }

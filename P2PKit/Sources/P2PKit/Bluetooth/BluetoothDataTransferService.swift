@@ -8,6 +8,7 @@
 import CoreBluetooth
 import Foundation
 import Observation
+import OSLog
 
 @Observable
 public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
@@ -24,11 +25,13 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
     }
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    private(set) var peripherals: [PeerID: CBPeripheral] = [:]
+    private var peripherals: [PeerID: CBPeripheral] = [:]
     @ObservationIgnored
-    private(set) var centralManager: CBCentralManager?
+    lazy var centralManager = makeManager()
     @ObservationIgnored
     private(set) var writeCharacteristics: [PeerID: CBCharacteristic] = [:]
+
+    let logger = Logger.bluetooth
 
     // MARK: - Init
 
@@ -39,12 +42,8 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - PeerDataTransferService
 
-    public func configure() async throws {
-        centralManager = CBCentralManager(delegate: self, queue: nil)
-    }
-
     public func connect(to peer: BluetoothPeer) {
-        guard let centralManager = centralManager, centralManager.state == .poweredOn else {
+        guard centralManager.state == .poweredOn else {
             return
         }
 
@@ -53,7 +52,8 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
     }
 
     public func send(_ data: Data, to peerID: PeerID) async throws {
-        guard let peripheral = peripherals[peerID],
+        guard
+            let peripheral = peripherals[peerID],
             let characteristic = writeCharacteristics[peerID]
         else {
             return
@@ -67,7 +67,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
             return
         }
 
-        centralManager?.cancelPeripheralConnection(peripheral)
+        centralManager.cancelPeripheralConnection(peripheral)
         peripherals[peerID] = nil
         writeCharacteristics[peerID] = nil
         delegate?.serviceDidDisconnectFromPeer(with: peerID)
@@ -78,6 +78,13 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
             disconnect(from: id)
         }
     }
+
+    // MARK: - Helpers
+
+    private func makeManager() -> CBCentralManager {
+        CBCentralManager(delegate: self, queue: nil)
+    }
+
 }
 
 // MARK: - CBCentralManagerDelegate
@@ -87,25 +94,25 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
     public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            print("Bluetooth is powered on")
+            logger.info("Bluetooth is powered on")
         case .poweredOff:
-            print("Bluetooth is powered off")
+            logger.info("Bluetooth is powered off")
             disconnectAll()
         case .unauthorized:
-            print("Bluetooth is unauthorized")
+            logger.info("Bluetooth is unauthorized")
         case .unsupported:
-            print("Bluetooth is unsupported")
+            logger.info("Bluetooth is unsupported")
         case .resetting:
-            print("Bluetooth is resetting")
+            logger.info("Bluetooth is resetting")
         case .unknown:
-            print("Bluetooth state is unknown")
+            logger.info("Bluetooth state is unknown")
         @unknown default:
-            print("Unknown Bluetooth state")
+            logger.warning("Unknown Bluetooth state")
         }
     }
 
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("Connected to peripheral: \(peripheral.identifier)")
+        logger.info("Connected to peripheral: \(peripheral.identifier)")
         peripheral.delegate = self
         peripheral.discoverServices(nil)
     }
@@ -115,14 +122,38 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
         didDisconnectPeripheral peripheral: CBPeripheral,
         error: Error?
     ) {
-        print("Disconnected from peripheral: \(peripheral.identifier)")
+        logger.info("Disconnected from peripheral: \(peripheral.identifier)")
         if let error = error {
-            print("Disconnect error: \(error)")
+            logger.error("Disconnect error: \(error)")
         }
 
         if let peerID = peripherals.first(where: { $0.value == peripheral })?.key {
             disconnect(from: peerID)
         }
+    }
+
+    public func centralManager(
+        _ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral,
+        timestamp: CFAbsoluteTime, isReconnecting: Bool, error: (any Error)?
+    ) {
+
+    }
+
+    public func centralManager(
+        _ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
+        advertisementData: [String: Any], rssi RSSI: NSNumber
+    ) {
+
+    }
+
+    public func centralManager(
+        _ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?
+    ) {
+
+    }
+
+    public func centralManager(_ central: CBCentralManager, willRestoreState dict: [String: Any]) {
+
     }
 
 }
@@ -133,7 +164,7 @@ extension BluetoothDataTransferService: CBPeripheralDelegate {
 
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard error == nil else {
-            print("Error discovering services: \(error!)")
+            logger.error("Error discovering services: \(error!)")
             return
         }
 
@@ -152,7 +183,7 @@ extension BluetoothDataTransferService: CBPeripheralDelegate {
         error: Error?
     ) {
         guard error == nil else {
-            print("Error discovering characteristics: \(error!)")
+            logger.error("Error discovering characteristics: \(error!)")
             return
         }
 
@@ -161,18 +192,14 @@ extension BluetoothDataTransferService: CBPeripheralDelegate {
         }
 
         for characteristic in characteristics {
-            if characteristic.properties.contains(.write)
-                || characteristic.properties.contains(.writeWithoutResponse)
-            {
+            if characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse) {
                 if let peerID = peripherals.first(where: { $0.value == peripheral })?.key {
                     writeCharacteristics[peerID] = characteristic
                     delegate?.serviceDidConnectToPeer(with: peerID)
                 }
             }
 
-            if characteristic.properties.contains(.notify)
-                || characteristic.properties.contains(.read)
-            {
+            if characteristic.properties.contains(.notify) || characteristic.properties.contains(.read) {
                 peripheral.setNotifyValue(true, for: characteristic)
             }
         }

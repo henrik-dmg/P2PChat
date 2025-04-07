@@ -55,16 +55,21 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
 
         let descriptor = NWBrowser.Descriptor.bonjour(type: service.rawValue, domain: nil)
         let browser = NWBrowser(for: descriptor, using: parameters)
-        browser.stateUpdateHandler = { newState in
+        browser.stateUpdateHandler = { [weak self] newState in
+            guard let self else { return }
             switch newState {
+            case .setup:
+                logger.info("Browser setup")
             case .ready:
-                print("Browser ready")
-            case .failed(let error):
-                print("Browser error: \(error)")
+                logger.info("Browser ready")
+            case let .waiting(error):
+                logger.error("Browser waiting: \(error)")
+            case let .failed(error):
+                logger.error("Browser failed: \(error)")
             case .cancelled:
-                print("Browser was stopped")
-            default:
-                print(newState)
+                logger.info("Browser was stopped")
+            @unknown default:
+                logger.warning("Unknown browser state: \(String(describing: newState))")
             }
         }
         browser.browseResultsChangedHandler = { [weak self] updated, changes in
@@ -95,14 +100,14 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
                         peer.endpoint == old.endpoint
                     }
                     guard let peerIndex else {
-                        break
+                        continue
                     }
                     print("Updating peer")
                     self?.availablePeers[peerIndex] = newPeer
                 case .identical:
-                    fallthrough
+                    continue
                 @unknown default:
-                    print("?")
+                    self?.logger.warning("Unknown change: \(String(describing: change))")
                 }
             }
         }

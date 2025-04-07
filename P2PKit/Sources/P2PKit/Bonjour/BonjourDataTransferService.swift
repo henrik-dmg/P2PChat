@@ -8,6 +8,7 @@
 import Foundation
 import Network
 import Observation
+import OSLog
 
 @Observable
 public class BonjourDataTransferService: NSObject, PeerDataTransferService {
@@ -28,6 +29,8 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
+    let logger = Logger.bonjour
+
     // MARK: - Init
 
     init(ownPeerID: PeerID) {
@@ -36,8 +39,6 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     }
 
     // MARK: - PeerDataTransferService
-
-    open func configure() async throws {}
 
     public func connect(to peer: BonjourPeer) {
         let connection = NWConnection(to: peer.endpoint, using: .tcp)
@@ -49,21 +50,28 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
             return  // Already connected to peer
         }
         connection.stateUpdateHandler = { [weak self] newState in
+            guard let self else { return }
             switch newState {
+            case .setup:
+                logger.info("Connection setting up")
+            case let .waiting(error):
+                logger.error("Connection waiting: \(error)")
+            case .preparing:
+                logger.info("Connection preparing")
             case .ready:
-                print("Connection ready, starting receive")
-                self?.delegate?.serviceDidConnectToPeer(with: peerID)
-                self?.receive(on: connection, peerID: peerID)
-            case .failed(let error):
-                print("Connection error: \(error)")
-                self?.delegate?.serviceDidFailToConnectToPeer(with: peerID, error: error)
-                self?.disconnect(from: peerID)
+                logger.info("Connection ready, starting receive")
+                delegate?.serviceDidConnectToPeer(with: peerID)
+                receive(on: connection, peerID: peerID)
+            case let .failed(error):
+                logger.error("Connection failed: \(error)")
+                delegate?.serviceDidFailToConnectToPeer(with: peerID, error: error)
+                disconnect(from: peerID)
             case .cancelled:
-                print("Connection was stopped")
-                self?.delegate?.serviceDidDisconnectFromPeer(with: peerID)
-                self?.disconnect(from: peerID)
-            default:
-                print(newState)
+                logger.info("Connection was stopped")
+                delegate?.serviceDidDisconnectFromPeer(with: peerID)
+                disconnect(from: peerID)
+            @unknown default:
+                logger.warning("Unknown connection state: \(String(describing: newState))")
             }
         }
         connection.start(queue: connectionsQueue)
@@ -96,29 +104,23 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     // Receives messages continuously from a given connection
     func receive(on connection: NWConnection, peerID: ChatPeer.ID) {
         guard connectedPeers.contains(peerID) else {
-            print("Stopping receive for disconnected peer \(peerID)")
+            logger.warning("Stopping receive for disconnected peer \(peerID)")
             return
         }
 
-        connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) {
-            [weak self] data, _, isComplete, error in
-            print("Receive callback called")
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
             // Check if data was received
             if let data, !data.isEmpty {
-                if let message = String(data: data, encoding: .utf8) {
-                    print("Received: \(message)")
-                    self?.delegate?.serviceReceived(data: data, from: peerID)
-                } else {
-                    print("Received binary data: \(data)")
-                }
+                self?.logger.debug("Received \(data.count) bytes from \(peerID)")
+                self?.delegate?.serviceReceived(data: data, from: peerID)
             }
 
             // Check for errors or connection end
             if isComplete {
-                print("Connection complete")
+                self?.logger.info("Receive complete")
                 connection.cancel()
-            } else if let error = error {
-                print("Connection error: \(error)")
+            } else if let error {
+                self?.logger.error("Receive error: \(error)")
                 connection.cancel()
             } else {
                 // If no error and not complete, continue receiving

@@ -31,7 +31,7 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
     // MARK: - PeerDiscoveryService
 
     public func startDiscoveringPeers() {
-        guard let centralManager = centralManager, centralManager.state == .poweredOn else {
+        guard centralManager.state == .poweredOn else {
             return
         }
 
@@ -48,7 +48,7 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
     }
 
     public func stopDiscoveringPeers() {
-        centralManager?.stopScan()
+        centralManager.stopScan()
         availablePeers = []
         discoveredPeripherals.removeAll()
         state = .inactive
@@ -59,36 +59,6 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
 
 extension BluetoothDiscoveryService {
 
-    public override func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
-        print("Discovered peripheral: \(peripheral.identifier)")
-
-        //        var updatedAdvertisementData = peripheral.
-
-        let peer = BluetoothPeer(
-            peripheral: peripheral,
-            advertisementData: [:]
-        )
-
-        discoveredPeripherals[peripheral.identifier] = peripheral
-
-        if !availablePeers.contains(where: { $0.id == peer.id }) {
-            availablePeers.append(peer)
-        }
-    }
-
-    public override func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
-
-    }
-
-    public override func centralManager(
-        _ central: CBCentralManager,
-        didDisconnectPeripheral peripheral: CBPeripheral,
-        error: Error?
-    ) {
-        super.centralManager(central, didDisconnectPeripheral: peripheral, error: error)
-
-        discoveredPeripherals[peripheral.identifier] = nil
-        availablePeers.removeAll { $0.peripheral.identifier == peripheral.identifier }
-    }
+    // TODO: Fill out stuff here
 
 }

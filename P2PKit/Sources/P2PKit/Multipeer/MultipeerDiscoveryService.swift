@@ -59,19 +59,19 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
 
     public func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
-        print("Browser found peer: \(peerID.displayName)")
+        logger.info("Browser found peer: \(peerID.displayName)")
         availablePeers.append(MultipeerPeer(identifier: peerID, info: info))
     }
 
     public func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        print("Browser lost peer: \(peerID.displayName)")
+        logger.info("Browser lost peer: \(peerID.displayName)")
         availablePeers.removeAll { peer in
             peer.identifier == peerID
         }
     }
 
     public func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: any Error) {
-        print("Browser did not start browsing for peers: \(error)")
+        logger.error("Browser did not start browsing for peers: \(error)")
         state = .error(error)
     }
 

@@ -17,8 +17,6 @@ public protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
     var connectedPeers: [PeerID] { get }
     var delegate: PeerDataTransferServiceDelegate? { get set }
 
-    func configure() async throws
-
     func connect(to peer: ChatPeer)
     func send(_ data: Data, to peerID: PeerID) async throws
     func disconnect(from peerID: PeerID)

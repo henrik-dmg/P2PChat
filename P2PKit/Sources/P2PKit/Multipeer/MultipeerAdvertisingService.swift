@@ -56,12 +56,12 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
         withContext context: Data?,
         invitationHandler: @escaping (Bool, MCSession?) -> Void
     ) {
-        print("Did receive invitation from \(peerID.displayName)")
+        logger.info("Did receive invitation from \(peerID.displayName)")
         invitationHandler(true, session)
     }
 
     public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
-        print("Advertiser did not start:", error)
+        logger.error("Advertiser did not start: \(error)")
         state = .error(error)
     }
 

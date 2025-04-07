@@ -56,36 +56,45 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
         let service = NWListener.Service(name: "P2P Chat Service", type: service.rawValue)
         let listener = try NWListener(service: service, using: parameters)
-        listener.stateUpdateHandler = { [weak self] newState in
+        listener.stateUpdateHandler = { [weak self] (newState: NWListener.State) in
+            guard let self else {
+                return
+            }
             switch newState {
+            case .setup:
+                logger.info("Listener setting up")
+            case let .waiting(error):
+                logger.error("Listener waiting with error: \(error)")
             case .ready:
-                print("Listener ready")
-            case .failed(let error):
-                print("Listener error: \(error)")
+                logger.info("Listener ready")
+            case let .failed(error):
+                logger.error("Listener error: \(error)")
             case .cancelled:
-                print("Listener was stopped")
-                self?.disconnectAll()
-            default:
-                print(newState)
+                logger.info("Listener stopped")
+                disconnectAll()
+            @unknown default:
+                logger.warning("Unknown listener state: \(String(describing: newState))")
             }
         }
 
         listener.newConnectionHandler = { [weak self] connection in
-            print("New connection", connection, connection.state)
+            self?.logger.info("New connection \(connection.debugDescription)")
             let peer = BonjourPeer(endpoint: connection.endpoint)
             self?.connect(with: connection, peerID: peer.id)
         }
         listener.newConnectionLimit = 1
 
         listener.serviceRegistrationUpdateHandler = { [weak self] registrationState in
-            print("Registration state changed:", registrationState)
+            guard let self else { return }
             switch registrationState {
             case .add:
-                self?.state = .active
+                logger.info("Service added")
+                state = .active
             case .remove:
-                self?.state = .inactive
+                logger.info("Service removed")
+                state = .inactive
             @unknown default:
-                print("Unknown service registration state")
+                logger.warning("Unknown service registration state: \(String(describing: registrationState))")
             }
         }
 
