@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+swift-format lint \
+  --recursive \
+  --parallel \
+  --strict \
+  --configuration config/swift-format.json \
+  P2PKit/Sources/ \
+  P2PKit/Tests/ \
+  P2PKit/Package.swift \
+  P2PChat
