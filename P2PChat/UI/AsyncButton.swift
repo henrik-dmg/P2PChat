@@ -59,9 +59,11 @@ extension AsyncButton {
     }
 }
 extension AsyncButton where Label == Text {
-    init(_ label: String,
-         actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
-         action: @escaping () async -> Void) {
+    init(
+        _ label: String,
+        actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
+        action: @escaping () async -> Void
+    ) {
         self.init(action: action) {
             Text(label)
         }
@@ -69,9 +71,11 @@ extension AsyncButton where Label == Text {
 }
 
 extension AsyncButton where Label == Image {
-    init(systemImageName: String,
-         actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
-         action: @escaping () async -> Void) {
+    init(
+        systemImageName: String,
+        actionOptions: Set<ActionOption> = Set(ActionOption.allCases),
+        action: @escaping () async -> Void
+    ) {
         self.init(action: action) {
             Image(systemName: systemImageName)
         }

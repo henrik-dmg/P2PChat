@@ -17,25 +17,31 @@ struct NameOnboardingView: View {
 
     var body: some View {
         List {
-            TextField("Name", text: $editingName)
+            Text("Please enter a name for your chat session. This name will be shown to other users.")
+            TextField("Name", text: $editingName) {
+                saveAndDismiss()
+            }
         }
         .navigationTitle("Edit Name")
-        .navigationBarTitleDisplayMode(.inline)
+        //        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Save") {
-                    guard isNameValid else {
-                        return
-                    }
-                    settings.name = editingName
-                    dismiss()
-                }.disabled(!isNameValid)
+                Button("Save", action: saveAndDismiss)
+                    .disabled(!isNameValid)
             }
         }
         .interactiveDismissDisabled(!isNameValid)
         .task {
-            editingName = settings.name ?? ""
+            editingName = settings.name
         }
+    }
+
+    private func saveAndDismiss() {
+        guard isNameValid else {
+            return
+        }
+        settings.name = editingName
+        dismiss()
     }
 
     private var isNameValid: Bool {

@@ -5,14 +5,15 @@
 //  Created by Henrik Panhans on 26.03.25.
 //
 
-import SwiftUI
 import P2PKit
+import SwiftUI
 
 struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
     @State var discoveryService: any PeerDiscoveryService<ChatPeer>
     @State var advertisingService: any PeerAdvertisingService<ChatPeer>
     let informationService: InformationService
+    let serviceType: ServiceType
 
     var body: some View {
         List {
@@ -22,7 +23,7 @@ struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService
             NavigationLink("Discover peers") {
                 PeerDiscoveryView(service: discoveryService, informationService: informationService)
             }
-        }
+        }.navigationTitle(serviceType.name)
     }
 }
 
@@ -31,7 +32,8 @@ struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService
         PeerPickerView(
             discoveryService: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: "test2"),
             advertisingService: BonjourAdvertisingService(service: .bonjourIdentifier, ownPeerID: "test2"),
-            informationService: BonjourInformationService()
+            informationService: BonjourInformationService(),
+            serviceType: .bonjour
         )
     }
 }

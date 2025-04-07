@@ -11,5 +11,6 @@ extension ServiceIdentifier {
 
     static let bonjourIdentifier = ServiceIdentifier("_p2pchat._tcp")
     static let multipeerIdentifier = ServiceIdentifier("p2pchat")
+    static let bluetoothIdentifier = ServiceIdentifier("p2pchat")
 
 }

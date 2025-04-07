@@ -5,9 +5,9 @@
 //  Created by Henrik Panhans on 22.03.25.
 //
 
-import SwiftUI
-import P2PKit
 import Observation
+import P2PKit
+import SwiftUI
 
 enum SheetContent<ChatPeer: Peer>: Identifiable {
 
@@ -34,20 +34,22 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
 
     var body: some View {
         List {
-            Section("Discovery") {
-                LabeledContent("Discovery peers", value: service.state.isActive ? "Yes" : "No")
-                Button(service.state.isActive ? "Stop discovering" : "Start discovering") {
-                    if service.state.isActive {
-                        service.stopDiscoveringPeers()
-                    } else {
-                        service.startDiscoveringPeers()
-                    }
-                }
-                ForEach(service.availablePeers) { peer in
-                    peerCellView(peer)
+            LabeledContent("Discovering peers") {
+                Text(service.state.isActive ? "Yes" : "No")
+                    .foregroundStyle(service.state.isActive ? .green : .red)
+            }
+            Button(service.state.isActive ? "Stop discovering" : "Start discovering") {
+                if service.state.isActive {
+                    service.stopDiscoveringPeers()
+                } else {
+                    service.startDiscoveringPeers()
                 }
             }
+            ForEach(service.availablePeers) { peer in
+                peerCellView(peer)
+            }
         }
+        .navigationTitle("Discovery")
         .sheet(item: $sheetContent) { content in
             switch content {
             case let .chat(peerIDs):
@@ -91,6 +93,5 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
             .tint(.blue)
         }
     }
-
 
 }

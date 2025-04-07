@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Observation
 import MultipeerConnectivity
+import Observation
 
 @Observable
 public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
@@ -42,7 +42,17 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
     public func configure() async throws {}
 
     public func connect(to peer: ChatPeer) {
-        session.connectPeer(peer.identifier, withNearbyConnectionData: Data())
+        session.nearbyConnectionData(forPeer: peer.identifier) { [weak self] data, error in
+            if let error {
+                print("Error fetching nearby connection data: \(error)")
+                return
+            }
+            guard let data else {
+                print("No error but no data either")
+                return
+            }
+            self?.session.connectPeer(peer.identifier, withNearbyConnectionData: data)
+        }
     }
 
     public func send(_ data: Data, to peerID: PeerID) async throws {
@@ -106,11 +116,22 @@ extension MultipeerDataTransferService: MCSessionDelegate {
         print("Session did receive stream")
     }
 
-    public func session(_ session: MCSession, didStartReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, with progress: Progress) {
+    public func session(
+        _ session: MCSession,
+        didStartReceivingResourceWithName resourceName: String,
+        fromPeer peerID: MCPeerID,
+        with progress: Progress
+    ) {
         print("Session did receiving resource with name \(resourceName)")
     }
 
-    public func session(_ session: MCSession, didFinishReceivingResourceWithName resourceName: String, fromPeer peerID: MCPeerID, at localURL: URL?, withError error: (any Error)?) {
+    public func session(
+        _ session: MCSession,
+        didFinishReceivingResourceWithName resourceName: String,
+        fromPeer peerID: MCPeerID,
+        at localURL: URL?,
+        withError error: (any Error)?
+    ) {
         print("Session did finish receiving resource with name \(resourceName)")
     }
 

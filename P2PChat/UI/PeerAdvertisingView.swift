@@ -5,26 +5,9 @@
 //  Created by Henrik Panhans on 26.03.25.
 //
 
+import Observation
 import P2PKit
 import SwiftUI
-import Observation
-
-@Observable
-final class PeerAdvertisingViewModel: NSObject, PeerDataTransferServiceDelegate {
-
-    func serviceDidConnectToPeer(with id: String) {
-
-    }
-    
-    func serviceReceived(data: Data, from peerID: String) {
-
-    }
-    
-    func serviceDidDisconnectFromPeer(with id: String) {
-
-    }
-
-}
 
 struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
@@ -36,7 +19,10 @@ struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationSe
     var body: some View {
         List {
             Section("Advertise") {
-                LabeledContent("Service advertised", value: service.state.isActive ? "Yes" : "No")
+                LabeledContent("Service advertised") {
+                    Text(service.state.isActive ? "Yes" : "No")
+                        .foregroundStyle(service.state.isActive ? .green : .red)
+                }
                 Button(service.state.isActive ? "Stop service" : "Start service") {
                     if service.state.isActive {
                         service.stopAdvertisingService()
@@ -46,6 +32,7 @@ struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationSe
                 }
             }
         }
+        .navigationTitle("Advertising")
         .sheet(item: $sheetContent) { content in
             switch content {
             case let .chat(peerIDs):

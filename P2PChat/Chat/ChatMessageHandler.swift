@@ -55,6 +55,10 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 
 extension ChatMessageHandler: PeerDataTransferServiceDelegate {
 
+    func serviceDidFailToConnectToPeer(with id: String, error: any Error) {
+        print("Did fail to connect to peer", id)
+    }
+
     func serviceReceived(data: Data, from peer: String) {
         // TODO: Handle incomming messages here
         do {

@@ -5,9 +5,8 @@
 //  Created by Henrik Panhans on 23.03.25.
 //
 
-import Foundation
-import Observation
 import Network
+import Observation
 
 @Observable
 public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
@@ -33,7 +32,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     public func startAdvertisingService() {
         guard listener == nil else {
-            return // TODO: Throw error
+            return  // TODO: Throw error
         }
         do {
             listener = try makeListener()
@@ -52,11 +51,14 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
     // MARK: - Helpers
 
     func makeListener() throws -> NWListener {
+        let parameters = NWParameters.tcp
+        parameters.includePeerToPeer = true  // Allow discovery on Bluetooth, etc.
+
         let service = NWListener.Service(name: "P2P Chat Service", type: service.rawValue)
-        let listener = try NWListener(service: service, using: .tcp)
+        let listener = try NWListener(service: service, using: parameters)
         listener.stateUpdateHandler = { [weak self] newState in
             switch newState {
-            case.ready:
+            case .ready:
                 print("Listener ready")
             case .failed(let error):
                 print("Listener error: \(error)")
@@ -68,7 +70,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
             }
         }
 
-        listener.newConnectionHandler = { [weak self]  connection in
+        listener.newConnectionHandler = { [weak self] connection in
             print("New connection", connection, connection.state)
             let peer = BonjourPeer(endpoint: connection.endpoint)
             self?.connect(with: connection, peerID: peer.id)

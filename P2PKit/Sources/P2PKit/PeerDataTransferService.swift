@@ -28,6 +28,7 @@ public protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
 
 public protocol PeerDataTransferServiceDelegate: AnyObject {
 
+    func serviceDidFailToConnectToPeer(with id: String, error: Error)
     func serviceDidConnectToPeer(with id: String)
     func serviceReceived(data: Data, from peerID: String)
     func serviceDidDisconnectFromPeer(with id: String)

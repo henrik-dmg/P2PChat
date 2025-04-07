@@ -7,10 +7,14 @@
 
 import Foundation
 
-public enum ServiceType: Hashable, CaseIterable {
+public enum ServiceType: String, Hashable, CaseIterable {
 
     case bluetooth
     case bonjour
     case multipeer
+
+    public var name: String {
+        rawValue.localizedCapitalized
+    }
 
 }

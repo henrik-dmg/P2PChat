@@ -6,14 +6,18 @@
 //
 
 import Foundation
+import Observation
 import P2PKit
 import SwiftUI
-import Observation
 
 @Observable
 final class Settings {
 
+    #if canImport(UIKit)
+    var name: String = UIDevice.current.name
+    #else
     var name: String = ""
+    #endif
 
     func isNameValid(_ name: String?) -> Bool {
         guard let name else {

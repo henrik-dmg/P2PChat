@@ -6,8 +6,8 @@
 //
 
 import Foundation
-import Observation
 import Network
+import Observation
 
 @Observable
 public class BonjourDataTransferService: NSObject, PeerDataTransferService {
@@ -15,15 +15,15 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     // MARK: - Nested Types
 
     public typealias ChatPeer = BonjourPeer
-    public typealias ConnectionState = NWConnection.State
 
     // MARK: - Properties
 
     public let ownPeerID: PeerID
-    public private(set) var connectedPeers: [PeerID] = []
+    public var connectedPeers: [PeerID] {
+        Array(connections.keys)
+    }
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    @ObservationIgnored
     private var connections: [PeerID: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
@@ -50,15 +50,17 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
         }
         connection.stateUpdateHandler = { [weak self] newState in
             switch newState {
-            case.ready:
+            case .ready:
                 print("Connection ready, starting receive")
                 self?.delegate?.serviceDidConnectToPeer(with: peerID)
                 self?.receive(on: connection, peerID: peerID)
             case .failed(let error):
                 print("Connection error: \(error)")
+                self?.delegate?.serviceDidFailToConnectToPeer(with: peerID, error: error)
                 self?.disconnect(from: peerID)
             case .cancelled:
                 print("Connection was stopped")
+                self?.delegate?.serviceDidDisconnectFromPeer(with: peerID)
                 self?.disconnect(from: peerID)
             default:
                 print(newState)
@@ -66,7 +68,6 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
         }
         connection.start(queue: connectionsQueue)
         connections[peerID] = connection
-        connectedPeers.append(peerID)
     }
 
     public func send(_ data: Data, to peerID: String) async throws {
@@ -82,8 +83,6 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
         }
         connection.cancel()
         connections[peerID] = nil
-        connectedPeers.removeAll(where: { $0 == peerID })
-        delegate?.serviceDidDisconnectFromPeer(with: peerID)
     }
 
     public func disconnectAll() {
@@ -96,7 +95,13 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
 
     // Receives messages continuously from a given connection
     func receive(on connection: NWConnection, peerID: ChatPeer.ID) {
-        connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) { [weak self] data, _, isComplete, error in
+        guard connectedPeers.contains(peerID) else {
+            print("Stopping receive for disconnected peer \(peerID)")
+            return
+        }
+
+        connection.receive(minimumIncompleteLength: 1, maximumLength: 65536) {
+            [weak self] data, _, isComplete, error in
             print("Receive callback called")
             // Check if data was received
             if let data, !data.isEmpty {

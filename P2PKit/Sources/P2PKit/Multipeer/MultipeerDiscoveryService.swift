@@ -15,7 +15,7 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers = [ChatPeer]()
+    public private(set) var availablePeers: [ChatPeer] = []
 
     @ObservationIgnored
     private lazy var browser = makeBrowser()
@@ -58,7 +58,7 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
 extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
 
-    public func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String : String]?) {
+    public func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
         print("Browser found peer: \(peerID.displayName)")
         availablePeers.append(MultipeerPeer(identifier: peerID, info: info))
     }

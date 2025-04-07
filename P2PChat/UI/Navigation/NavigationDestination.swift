@@ -5,8 +5,8 @@
 //  Created by Henrik Panhans on 27.03.25.
 //
 
-import SwiftUI
 import P2PKit
+import SwiftUI
 
 enum NavigationDestination: Hashable {
 
@@ -24,18 +24,25 @@ enum NavigationDestination: Hashable {
         case let .peerPicker(serviceType, ownPeerID):
             switch serviceType {
             case .bluetooth:
-                Text("Bluetooth not supported yet")
+                PeerPickerView(
+                    discoveryService: BluetoothDiscoveryService(service: .bluetoothIdentifier, ownPeerID: ownPeerID),
+                    advertisingService: BluetoothAdvertisingService(service: .bluetoothIdentifier, ownPeerID: ownPeerID),
+                    informationService: BluetoothInformationService(),
+                    serviceType: .bluetooth
+                )
             case .bonjour:
                 PeerPickerView(
                     discoveryService: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: ownPeerID),
                     advertisingService: BonjourAdvertisingService(service: .bonjourIdentifier, ownPeerID: ownPeerID),
-                    informationService: BonjourInformationService()
+                    informationService: BonjourInformationService(),
+                    serviceType: .bonjour
                 )
             case .multipeer:
                 PeerPickerView(
                     discoveryService: MultipeerDiscoveryService(service: .multipeerIdentifier, ownPeerID: ownPeerID),
                     advertisingService: MultipeerAdvertisingService(service: .multipeerIdentifier, ownPeerID: ownPeerID),
-                    informationService: MultipeerInformationService()
+                    informationService: MultipeerInformationService(),
+                    serviceType: .multipeer
                 )
             }
         }

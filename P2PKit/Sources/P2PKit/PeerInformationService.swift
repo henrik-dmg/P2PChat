@@ -5,8 +5,8 @@
 //  Created by Henrik Panhans on 22.03.25.
 //
 
-import SwiftUI
 import Observation
+import SwiftUI
 
 public protocol PeerInformationService<ChatPeer> {
 
