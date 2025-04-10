@@ -7,11 +7,10 @@
 
 import Observation
 
-public protocol PeerAdvertisingService<ChatPeer>: PeerDataTransferService {
+public protocol PeerAdvertisingService<P>: PeerDataTransferService {
 
-    associatedtype Callback = (Result<[ChatPeer.ID], any Error>) -> Void
+    associatedtype Callback = (Result<[P.ID], any Error>) -> Void
 
-    var service: ServiceIdentifier { get }
     var state: ServiceState { get }
 
     func startAdvertisingService()

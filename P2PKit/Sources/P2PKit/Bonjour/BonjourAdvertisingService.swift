@@ -13,20 +13,12 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
 
     @ObservationIgnored
     private var listener: NWListener?
     @ObservationIgnored
     private let listenerQueue = DispatchQueue(label: "listenerQueue")
-
-    // MARK: - Init
-
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
-        super.init(ownPeerID: ownPeerID)
-    }
 
     // MARK: - PeerDiscoveryService
 
@@ -54,7 +46,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true  // Allow discovery on Bluetooth, etc.
 
-        let service = NWListener.Service(name: "P2P Chat Service", type: service.rawValue)
+        let service = NWListener.Service(name: "P2P Chat Service", type: service.type)
         let listener = try NWListener(service: service, using: parameters)
         listener.stateUpdateHandler = { [weak self] (newState: NWListener.State) in
             guard let self else {

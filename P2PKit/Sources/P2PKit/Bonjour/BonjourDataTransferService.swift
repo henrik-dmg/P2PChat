@@ -10,22 +10,33 @@ import Network
 import OSLog
 import Observation
 
+public struct BonjourService: Service {
+    public let type: String
+
+    public init(type: String) {
+        self.type = type
+    }
+}
+
 @Observable
 public class BonjourDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
-    public typealias ChatPeer = BonjourPeer
+    public typealias P = BonjourPeer
+    public typealias S = BonjourService
 
     // MARK: - Properties
 
-    public let ownPeerID: PeerID
-    public var connectedPeers: [PeerID] {
+    public let ownPeerID: ID
+    public var connectedPeers: [ID] {
         Array(connections.keys)
     }
+
+    public let service: S
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    private var connections: [PeerID: NWConnection] = [:]
+    private var connections: [ID: NWConnection] = [:]
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
@@ -33,8 +44,9 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Init
 
-    init(ownPeerID: PeerID) {
+    public init(ownPeerID: ID, service: S) {
         self.ownPeerID = ownPeerID
+        self.service = service
         super.init()
     }
 
@@ -45,7 +57,7 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
         connect(with: connection, peerID: peer.id)
     }
 
-    func connect(with connection: NWConnection, peerID: ChatPeer.ID) {
+    func connect(with connection: NWConnection, peerID: P.ID) {
         guard connections[peerID] == nil else {
             return  // Already connected to peer
         }
@@ -85,7 +97,7 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
         try await connection.sendData(data)
     }
 
-    public func disconnect(from peerID: ChatPeer.ID) {
+    public func disconnect(from peerID: P.ID) {
         guard let connection = connections[peerID] else {
             return
         }
@@ -102,7 +114,7 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     // MARK: - Helpers
 
     // Receives messages continuously from a given connection
-    func receive(on connection: NWConnection, peerID: ChatPeer.ID) {
+    func receive(on connection: NWConnection, peerID: P.ID) {
         guard connectedPeers.contains(peerID) else {
             logger.warning("Stopping receive for disconnected peer \(peerID)")
             return

@@ -13,18 +13,10 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
 
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
-
-    // MARK: - Init
-
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
-        super.init(ownPeerID: ownPeerID)
-    }
 
     // MARK: - PeerDiscoveryService
 
@@ -41,7 +33,7 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
     // MARK: - Helpers
 
     func makeAdvertiser() -> MCNearbyServiceAdvertiser {
-        let advertiser = MCNearbyServiceAdvertiser(peer: ownMCPeerID, discoveryInfo: nil, serviceType: service.rawValue)
+        let advertiser = MCNearbyServiceAdvertiser(peer: ownMCPeerID, discoveryInfo: nil, serviceType: service.type)
         advertiser.delegate = self
         return advertiser
     }

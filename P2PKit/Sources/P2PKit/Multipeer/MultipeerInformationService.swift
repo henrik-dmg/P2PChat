@@ -11,7 +11,7 @@ public struct MultipeerInformationService: PeerInformationService {
 
     // MARK: - Nested Types
 
-    public typealias ChatPeer = MultipeerPeer
+    public typealias P = MultipeerPeer
 
     // MARK: - Init
 
@@ -19,14 +19,14 @@ public struct MultipeerInformationService: PeerInformationService {
 
     // MARK: - Methods
 
-    public func peerCellView(for peer: ChatPeer) -> some View {
+    public func peerCellView(for peer: P) -> some View {
         VStack(alignment: .leading) {
             Text(peer.id)
             Text("Multipeer peer")
         }
     }
 
-    public func peerInformationView(for peer: ChatPeer) -> some View {
+    public func peerInformationView(for peer: P) -> some View {
         NavigationView {
             List {
                 LabeledContent("ID", value: peer.id)

@@ -13,19 +13,11 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers: [ChatPeer] = []
+    public private(set) var availablePeers: [P] = []
 
     @ObservationIgnored
     private lazy var browser = makeBrowser()
-
-    // MARK: - Init
-
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
-        super.init(ownPeerID: ownPeerID)
-    }
 
     // MARK: - PeerDiscoveryService
 
@@ -42,14 +34,14 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     // MARK: - Overridden Methods
 
-    public override func connect(to peer: ChatPeer) {
+    public override func connect(to peer: P) {
         browser.invitePeer(peer.identifier, to: session, withContext: nil, timeout: 10)
     }
 
     // MARK: - Helpers
 
     private func makeBrowser() -> MCNearbyServiceBrowser {
-        let browser = MCNearbyServiceBrowser(peer: session.myPeerID, serviceType: service.rawValue)
+        let browser = MCNearbyServiceBrowser(peer: session.myPeerID, serviceType: service.type)
         browser.delegate = self
         return browser
     }

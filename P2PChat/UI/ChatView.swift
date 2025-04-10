@@ -135,7 +135,7 @@ struct ChatMessageCellView<ChatPeer: Peer>: View {
 
 #Preview("Chat") {
     ChatView(
-        service: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: "test1"),
+        service: BonjourDiscoveryService(ownPeerID: "test1", service: .bonjour),
         peerID: "test"
     )
 }

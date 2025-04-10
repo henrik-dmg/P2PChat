@@ -8,18 +8,21 @@
 import Foundation
 import Observation
 
-public protocol PeerDataTransferService<ChatPeer>: AnyObject, Observable {
+public protocol PeerDataTransferService<P>: AnyObject, Observable {
 
-    associatedtype ChatPeer: Peer
-    typealias PeerID = ChatPeer.ID
+    associatedtype P: Peer
+    associatedtype S: Service
+    typealias ID = P.ID
 
-    var ownPeerID: PeerID { get }
-    var connectedPeers: [PeerID] { get }
+    var ownPeerID: ID { get }
+    var connectedPeers: [ID] { get }
+    var service: S { get }
+
     var delegate: PeerDataTransferServiceDelegate? { get set }
 
-    func connect(to peer: ChatPeer)
-    func send(_ data: Data, to peerID: PeerID) async throws
-    func disconnect(from peerID: PeerID)
+    func connect(to peer: P)
+    func send(_ data: Data, to peerID: ID) async throws
+    func disconnect(from peerID: ID)
     func disconnectAll()
 
 }

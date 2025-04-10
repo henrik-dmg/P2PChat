@@ -10,23 +10,38 @@ import Foundation
 import OSLog
 import Observation
 
+public struct BluetoothService: Service {
+    public let type: CBUUID
+    public let writeCharacteristicUUID: String
+    public let readCharacteristicUUID: String
+
+    public init(type: CBUUID, writeCharacteristicUUID: String, readCharacteristicUUID: String) {
+        self.type = type
+        self.writeCharacteristicUUID = writeCharacteristicUUID
+        self.readCharacteristicUUID = readCharacteristicUUID
+    }
+}
+
 @Observable
 public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
-    public typealias ChatPeer = BluetoothPeer
+    public typealias P = BluetoothPeer
+    public typealias S = BluetoothService
 
     // MARK: - Properties
 
-    public let ownPeerID: PeerID
-    public var connectedPeers: [PeerID] {
+    public let ownPeerID: ID
+    public var connectedPeers: [ID] {
         Array(peripherals.keys)
     }
+
+    public let service: S
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    private(set) var peripherals: [PeerID: CBPeripheral] = [:]
-    private(set) var writeCharacteristics: [PeerID: CBCharacteristic] = [:]
+    private(set) var peripherals: [ID: CBPeripheral] = [:]
+    private(set) var writeCharacteristics: [ID: CBCharacteristic] = [:]
 
     let centralManager: CBCentralManager
     let connectionsQueue: DispatchQueue
@@ -35,8 +50,9 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Init
 
-    init(ownPeerID: PeerID) {
+    public init(ownPeerID: ID, service: S) {
         self.ownPeerID = ownPeerID
+        self.service = service
         self.connectionsQueue = DispatchQueue(label: "bluetoothQueue")
         self.centralManager = CBCentralManager(delegate: nil, queue: connectionsQueue)
         super.init()
@@ -61,7 +77,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         peripherals[peer.id] = peer.peripheral
     }
 
-    public func send(_ data: Data, to peerID: PeerID) async throws {
+    public func send(_ data: Data, to peerID: ID) async throws {
         guard let peripheral = peripherals[peerID],
             let characteristic = writeCharacteristics[peerID]
         else {
@@ -79,7 +95,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         }
     }
 
-    public func disconnect(from peerID: PeerID) {
+    public func disconnect(from peerID: ID) {
         guard let peripheral = peripherals[peerID] else {
             return
         }
@@ -95,7 +111,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Helpers
 
-    func peerID(for peripheral: CBPeripheral) -> PeerID {
+    func peerID(for peripheral: CBPeripheral) -> ID {
         peripheral.identifier.uuidString
     }
 

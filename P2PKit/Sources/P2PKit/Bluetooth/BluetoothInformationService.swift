@@ -11,7 +11,7 @@ public struct BluetoothInformationService: PeerInformationService {
 
     // MARK: - Nested Types
 
-    public typealias ChatPeer = BluetoothPeer
+    public typealias P = BluetoothPeer
 
     // MARK: - Init
 
@@ -19,7 +19,7 @@ public struct BluetoothInformationService: PeerInformationService {
 
     // MARK: - Methods
 
-    public func peerCellView(for peer: ChatPeer) -> some View {
+    public func peerCellView(for peer: P) -> some View {
         VStack(alignment: .leading) {
             Text(peer.name)
             //            if let rssi = peer.rssi {
@@ -28,7 +28,7 @@ public struct BluetoothInformationService: PeerInformationService {
         }
     }
 
-    public func peerInformationView(for peer: ChatPeer) -> some View {
+    public func peerInformationView(for peer: P) -> some View {
         NavigationView {
             List {
                 LabeledContent("Name", value: peer.name)

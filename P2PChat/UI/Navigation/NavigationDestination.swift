@@ -25,22 +25,22 @@ enum NavigationDestination: Hashable {
             switch serviceType {
             case .bluetooth:
                 PeerPickerView(
-                    discoveryService: BluetoothDiscoveryService(service: .bluetoothIdentifier, ownPeerID: ownPeerID),
-                    advertisingService: BluetoothAdvertisingService(service: .bluetoothIdentifier, ownPeerID: ownPeerID),
+                    discoveryService: BluetoothDiscoveryService(ownPeerID: ownPeerID, service: .bluetooth),
+                    advertisingService: BluetoothAdvertisingService(ownPeerID: ownPeerID, service: .bluetooth),
                     informationService: BluetoothInformationService(),
                     serviceType: .bluetooth
                 )
             case .bonjour:
                 PeerPickerView(
-                    discoveryService: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: ownPeerID),
-                    advertisingService: BonjourAdvertisingService(service: .bonjourIdentifier, ownPeerID: ownPeerID),
+                    discoveryService: BonjourDiscoveryService(ownPeerID: ownPeerID, service: .bonjour),
+                    advertisingService: BonjourAdvertisingService(ownPeerID: ownPeerID, service: .bonjour),
                     informationService: BonjourInformationService(),
                     serviceType: .bonjour
                 )
             case .multipeer:
                 PeerPickerView(
-                    discoveryService: MultipeerDiscoveryService(service: .multipeerIdentifier, ownPeerID: ownPeerID),
-                    advertisingService: MultipeerAdvertisingService(service: .multipeerIdentifier, ownPeerID: ownPeerID),
+                    discoveryService: MultipeerDiscoveryService(ownPeerID: ownPeerID, service: .multipeer),
+                    advertisingService: MultipeerAdvertisingService(ownPeerID: ownPeerID, service: .multipeer),
                     informationService: MultipeerInformationService(),
                     serviceType: .multipeer
                 )

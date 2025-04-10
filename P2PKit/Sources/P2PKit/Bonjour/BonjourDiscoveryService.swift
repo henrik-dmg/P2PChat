@@ -13,21 +13,13 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers: [ChatPeer] = []
+    public private(set) var availablePeers: [P] = []
 
     @ObservationIgnored
     private var browser: NWBrowser?
     @ObservationIgnored
     private let browserQueue = DispatchQueue(label: "browserQueue")
-
-    // MARK: - Init
-
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
-        super.init(ownPeerID: ownPeerID)
-    }
 
     // MARK: - PeerDiscoveryService
 
@@ -53,7 +45,7 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true  // Allow discovery on Bluetooth, etc.
 
-        let descriptor = NWBrowser.Descriptor.bonjour(type: service.rawValue, domain: nil)
+        let descriptor = NWBrowser.Descriptor.bonjour(type: service.type, domain: nil)
         let browser = NWBrowser(for: descriptor, using: parameters)
         browser.stateUpdateHandler = { [weak self] newState in
             guard let self else { return }

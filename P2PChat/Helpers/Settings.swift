@@ -16,7 +16,7 @@ final class Settings {
     #if canImport(UIKit)
     var name: String = UIDevice.current.name
     #else
-    var name: String = ""
+    var name: String = UUID().uuidString
     #endif
 
     func isNameValid(_ name: String?) -> Bool {

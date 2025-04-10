@@ -14,22 +14,18 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
-    public var availablePeers: [ChatPeer] {
+    public var availablePeers: [P] {
         Array(discoveredPeripherals.values)
     }
 
     @ObservationIgnored
-    private var discoveredPeripherals: [PeerID: ChatPeer] = [:]
-    @ObservationIgnored
-    private lazy var serviceID = CBUUID(string: service.rawValue)
+    private var discoveredPeripherals: [ID: P] = [:]
 
     // MARK: - Init
 
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
-        super.init(ownPeerID: ownPeerID)
+    public override init(ownPeerID: ID, service: S) {
+        super.init(ownPeerID: ownPeerID, service: service)
         centralManager.delegate = self  // TODO: Double-check if this is needed
     }
 
@@ -45,7 +41,7 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
             CBCentralManagerScanOptionAllowDuplicatesKey: false
         ]
 
-        centralManager.scanForPeripherals(withServices: [serviceID], options: options)
+        centralManager.scanForPeripherals(withServices: [service.type], options: options)
     }
 
     public func stopDiscoveringPeers() {

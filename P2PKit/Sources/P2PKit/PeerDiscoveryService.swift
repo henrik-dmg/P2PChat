@@ -7,10 +7,9 @@
 
 import Observation
 
-public protocol PeerDiscoveryService<ChatPeer>: PeerDataTransferService {
+public protocol PeerDiscoveryService<P>: PeerDataTransferService {
 
-    var service: ServiceIdentifier { get }
-    var availablePeers: [ChatPeer] { get }
+    var availablePeers: [P] { get }
     var state: ServiceState { get }
 
     func startDiscoveringPeers()

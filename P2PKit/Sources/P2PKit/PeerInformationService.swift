@@ -8,13 +8,13 @@
 import Observation
 import SwiftUI
 
-public protocol PeerInformationService<ChatPeer> {
+public protocol PeerInformationService<P> {
 
-    associatedtype ChatPeer: Peer
+    associatedtype P: Peer
     associatedtype CellView: View
     associatedtype InformationView: View
 
-    func peerCellView(for peer: ChatPeer) -> CellView
-    func peerInformationView(for peer: ChatPeer) -> InformationView
+    func peerCellView(for peer: P) -> CellView
+    func peerInformationView(for peer: P) -> InformationView
 
 }

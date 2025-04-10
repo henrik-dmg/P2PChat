@@ -10,26 +10,21 @@ import Foundation
 import Observation
 
 @Observable
-public final class BluetoothAdvertisingService: BluetoothDataTransferService, PeerAdvertisingService
-{
+public final class BluetoothAdvertisingService: BluetoothDataTransferService, PeerAdvertisingService {
 
     // MARK: - Properties
 
-    public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
 
     private let peripheralManager: CBPeripheralManager
     private let peripheralQueue: DispatchQueue
-    @ObservationIgnored
-    private lazy var serviceID = CBUUID(string: service.rawValue)
 
     // MARK: - Init
 
-    public init(service: ServiceIdentifier, ownPeerID: PeerID) {
-        self.service = service
+    public override init(ownPeerID: ID, service: S) {
         self.peripheralQueue = DispatchQueue(label: "peripheralQueue")
         self.peripheralManager = CBPeripheralManager(delegate: nil, queue: peripheralQueue, options: nil)
-        super.init(ownPeerID: ownPeerID)
+        super.init(ownPeerID: ownPeerID, service: service)
         peripheralManager.delegate = self
         peripheralManager.add(makeService())
     }
@@ -38,7 +33,7 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
 
     public func startAdvertisingService() {
         let advertisementData: [String: Any] = [
-            CBAdvertisementDataServiceUUIDsKey: [serviceID],
+            CBAdvertisementDataServiceUUIDsKey: [service.readCharacteristicUUID, service.writeCharacteristicUUID],
             CBAdvertisementDataLocalNameKey: ownPeerID,
         ]
 
@@ -58,11 +53,11 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
     }
 
     private func makeService() -> CBMutableService {
-        let transferService = CBMutableService(type: serviceID, primary: true)
+        let transferService = CBMutableService(type: service.type, primary: true)
 
         // Create separate UUIDs for read and write characteristics
-        let readCharacteristicUUID = CBUUID(string: "\(service.rawValue)-read")
-        let writeCharacteristicUUID = CBUUID(string: "\(service.rawValue)-write")
+        let readCharacteristicUUID = CBUUID(string: service.readCharacteristicUUID)
+        let writeCharacteristicUUID = CBUUID(string: service.writeCharacteristicUUID)
 
         // Read characteristic for receiving data
         let readCharacteristic = CBMutableCharacteristic(

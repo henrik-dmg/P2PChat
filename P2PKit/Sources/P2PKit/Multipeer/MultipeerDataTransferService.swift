@@ -10,23 +10,33 @@ import MultipeerConnectivity
 import OSLog
 import Observation
 
+public struct MultipeerService: Service {
+    public let type: String
+
+    public init(type: String) {
+        self.type = type
+    }
+}
+
 @Observable
 public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Nested Types
 
-    public typealias ChatPeer = MultipeerPeer
-    public typealias ConnectionState = Bool
+    public typealias P = MultipeerPeer
+    public typealias S = MultipeerService
 
     // MARK: - Properties
 
-    public let ownPeerID: PeerID
-    public var connectedPeers: [PeerID] {
+    public let ownPeerID: ID
+    public var connectedPeers: [ID] {
         Array(connections.keys)
     }
+
+    public let service: S
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    private var connections: [PeerID: MCPeerID] = [:]
+    private var connections: [ID: MCPeerID] = [:]
     @ObservationIgnored
     lazy var session = makeSession()
     @ObservationIgnored
@@ -36,14 +46,15 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Init
 
-    init(ownPeerID: PeerID) {
+    public init(ownPeerID: ID, service: S) {
         self.ownPeerID = ownPeerID
+        self.service = service
         super.init()
     }
 
     // MARK: - PeerDataTransferService
 
-    public func connect(to peer: ChatPeer) {
+    public func connect(to peer: P) {
         session.nearbyConnectionData(forPeer: peer.identifier) { [weak self] data, error in
             if let error {
                 self?.logger.error("Error fetching nearby connection data for peer \(peer.identifier): \(error)")
@@ -57,7 +68,7 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
         }
     }
 
-    public func send(_ data: Data, to peerID: PeerID) async throws {
+    public func send(_ data: Data, to peerID: ID) async throws {
         guard let storedPeerID = connections[peerID] else {
             logger.warning("No stored peerID for \(peerID)")
             return
@@ -70,7 +81,7 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
         logger.info("Successfully sent data to peer \(peerID)")
     }
 
-    public func disconnect(from peerID: PeerID) {
+    public func disconnect(from peerID: ID) {
         session.disconnect()  // Apparently not possible to disconnect from single peer
     }
 

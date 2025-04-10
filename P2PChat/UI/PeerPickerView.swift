@@ -30,8 +30,8 @@ struct PeerPickerView<ChatPeer: Peer, InformationService: PeerInformationService
 #Preview {
     NavigationStack {
         PeerPickerView(
-            discoveryService: BonjourDiscoveryService(service: .bonjourIdentifier, ownPeerID: "test2"),
-            advertisingService: BonjourAdvertisingService(service: .bonjourIdentifier, ownPeerID: "test2"),
+            discoveryService: BonjourDiscoveryService(ownPeerID: "test2", service: .bonjour),
+            advertisingService: BonjourAdvertisingService(ownPeerID: "test2", service: .bonjour),
             informationService: BonjourInformationService(),
             serviceType: .bonjour
         )
