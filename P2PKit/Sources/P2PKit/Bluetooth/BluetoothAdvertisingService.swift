@@ -18,11 +18,9 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
     public private(set) var state: ServiceState = .inactive
 
     @ObservationIgnored
-    private var peripheralManager: CBPeripheralManager?
+    private lazy var peripheralManager = makeManager()
     @ObservationIgnored
-    private var transferCharacteristic: CBMutableCharacteristic?
-    @ObservationIgnored
-    private var transferService: CBMutableService?
+    private lazy var serviceID = CBUUID(string: service.rawValue)
 
     // MARK: - Init
 
@@ -34,13 +32,41 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
     // MARK: - PeerAdvertisingService
 
     public func startAdvertisingService() {
-        peripheralManager = CBPeripheralManager(delegate: self, queue: nil)
+        let advertisementData: [String: Any] = [
+            CBAdvertisementDataServiceUUIDsKey: [serviceID],
+            CBAdvertisementDataLocalNameKey: ownPeerID,
+        ]
+
+        peripheralManager.startAdvertising(advertisementData)
+        state = .active
     }
 
     public func stopAdvertisingService() {
-        peripheralManager?.stopAdvertising()
-        peripheralManager = nil
+        peripheralManager.stopAdvertising()
         state = .inactive
+    }
+
+    // MARK: - Helpers
+
+    private func makeManager() -> CBPeripheralManager {
+        let manager = CBPeripheralManager(delegate: self, queue: nil)
+        manager.add(makeService())
+        return manager
+    }
+
+    private func makeService() -> CBMutableService {
+        let transferService = CBMutableService(type: serviceID, primary: true)
+
+        let transferCharacteristic = CBMutableCharacteristic(
+            type: serviceID,
+            properties: [.write, .notify],
+            value: nil,
+            permissions: [.writeable]
+        )
+
+        transferService.characteristics = [transferCharacteristic]
+
+        return transferService
     }
 
 }
@@ -53,10 +79,8 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         switch peripheral.state {
         case .poweredOn:
             logger.info("Peripheral manager is powered on")
-            setupService()
         case .poweredOff:
             logger.info("Peripheral manager is powered off")
-            stopAdvertisingService()
         case .unauthorized:
             logger.info("Peripheral manager is unauthorized")
         case .unsupported:
@@ -70,11 +94,7 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         }
     }
 
-    public func peripheralManager(
-        _ peripheral: CBPeripheralManager,
-        central: CBCentral,
-        didSubscribeTo characteristic: CBCharacteristic
-    ) {
+    public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
         logger.info("Central subscribed to characteristic")
     }
 
@@ -96,34 +116,6 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
             delegate?.serviceReceived(data: data, from: request.central.identifier.uuidString)
             peripheral.respond(to: request, withResult: .success)
         }
-    }
-
-    // MARK: - Helpers
-
-    private func setupService() {
-        transferCharacteristic = CBMutableCharacteristic(
-            type: CBUUID(nsuuid: UUID()),
-            properties: [.write, .notify],
-            value: nil,
-            permissions: [.writeable]
-        )
-
-        transferService = CBMutableService(
-            type: CBUUID(nsuuid: UUID()),
-            primary: true
-        )
-
-        transferService?.characteristics = [transferCharacteristic!]
-
-        peripheralManager?.add(transferService!)
-
-        let advertisementData: [String: Any] = [
-            CBAdvertisementDataServiceUUIDsKey: [CBUUID(nsuuid: UUID())],
-            CBAdvertisementDataLocalNameKey: ownPeerID,
-        ]
-
-        peripheralManager?.startAdvertising(advertisementData)
-        state = .active
     }
 
 }

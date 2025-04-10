@@ -16,10 +16,12 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
 
     public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers: [ChatPeer] = []
+    public var availablePeers: [ChatPeer] {
+        Array(discoveredPeripherals.values)
+    }
 
     @ObservationIgnored
-    private var discoveredPeripherals: [UUID: CBPeripheral] = [:]
+    private var discoveredPeripherals: [PeerID: ChatPeer] = [:]
 
     // MARK: - Init
 
@@ -39,18 +41,13 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
             CBCentralManagerScanOptionAllowDuplicatesKey: true
         ]
 
-        centralManager.scanForPeripherals(
-            withServices: [CBUUID(string: service.rawValue)],
-            options: options
-        )
-
+        centralManager.scanForPeripherals(withServices: [CBUUID(string: service.rawValue)], options: options)
         state = .active
     }
 
     public func stopDiscoveringPeers() {
-        centralManager.stopScan()
-        availablePeers = []
         discoveredPeripherals.removeAll()
+        centralManager.stopScan()
         state = .inactive
     }
 }
@@ -59,6 +56,16 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
 
 extension BluetoothDiscoveryService {
 
-    // TODO: Fill out stuff here
+    public override func centralManager(
+        _ central: CBCentralManager,
+        didDiscover peripheral: CBPeripheral,
+        advertisementData: [String : Any],
+        rssi RSSI: NSNumber
+    ) {
+        super.centralManager(central, didDiscover: peripheral, advertisementData: advertisementData, rssi: RSSI)
+
+        let peerID = peerID(for: peripheral)
+        discoveredPeripherals[peerID] = BluetoothPeer(peripheral: peripheral, advertisementData: advertisementData)
+    }
 
 }
