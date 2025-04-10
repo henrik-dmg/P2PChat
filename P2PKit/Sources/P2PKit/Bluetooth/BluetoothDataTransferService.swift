@@ -7,8 +7,8 @@
 
 import CoreBluetooth
 import Foundation
-import Observation
 import OSLog
+import Observation
 
 @Observable
 public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
@@ -28,10 +28,8 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
     private(set) var peripherals: [PeerID: CBPeripheral] = [:]
     private(set) var writeCharacteristics: [PeerID: CBCharacteristic] = [:]
 
-    @ObservationIgnored
-    lazy var centralManager = makeManager()
-    @ObservationIgnored
-    private let connectionsQueue = DispatchQueue(label: "bluetoothQueue")
+    let centralManager: CBCentralManager
+    let connectionsQueue: DispatchQueue
 
     let logger = Logger.bluetooth
 
@@ -39,7 +37,10 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     init(ownPeerID: PeerID) {
         self.ownPeerID = ownPeerID
+        self.connectionsQueue = DispatchQueue(label: "bluetoothQueue")
+        self.centralManager = CBCentralManager(delegate: nil, queue: connectionsQueue)
         super.init()
+        centralManager.delegate = self
     }
 
     // MARK: - PeerDataTransferService
@@ -49,16 +50,33 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
             return
         }
 
-        centralManager.connect(peer.peripheral, options: nil)
+        // Add connection options to prevent pairing UI
+        let options: [String: Any] = [
+            CBConnectPeripheralOptionNotifyOnConnectionKey: false,
+            CBConnectPeripheralOptionNotifyOnDisconnectionKey: false,
+            CBConnectPeripheralOptionNotifyOnNotificationKey: false,
+        ]
+
+        centralManager.connect(peer.peripheral, options: options)
         peripherals[peer.id] = peer.peripheral
     }
 
     public func send(_ data: Data, to peerID: PeerID) async throws {
-        guard let peripheral = peripherals[peerID], let characteristic = writeCharacteristics[peerID] else {
+        guard let peripheral = peripherals[peerID],
+            let characteristic = writeCharacteristics[peerID]
+        else {
             return
         }
 
-        peripheral.writeValue(data, for: characteristic, type: .withResponse)
+        // Split data into chunks if it's too large (BLE has a 20-byte limit per packet)
+        let chunkSize = 20
+        let chunks = stride(from: 0, to: data.count, by: chunkSize).map {
+            data[$0..<min($0 + chunkSize, data.count)]
+        }
+
+        for chunk in chunks {
+            peripheral.writeValue(chunk, for: characteristic, type: .withResponse)
+        }
     }
 
     public func disconnect(from peerID: PeerID) {
@@ -77,8 +95,8 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     // MARK: - Helpers
 
-    private func makeManager() -> CBCentralManager {
-        CBCentralManager(delegate: self, queue: nil)
+    func peerID(for peripheral: CBPeripheral) -> PeerID {
+        peripheral.identifier.uuidString
     }
 
     private func handlePeripheralConnected(_ peripheral: CBPeripheral) {
@@ -92,10 +110,6 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         peripherals[peerID] = nil
         writeCharacteristics[peerID] = nil
         delegate?.serviceDidDisconnectFromPeer(with: peerID)
-    }
-
-    func peerID(for peripheral: CBPeripheral) -> PeerID {
-        peripheral.identifier.uuidString
     }
 
 }
@@ -125,9 +139,9 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
     }
 
     public func centralManager(
-        _ central: CBCentralManager, 
-        didDiscover peripheral: CBPeripheral, 
-        advertisementData: [String : Any], 
+        _ central: CBCentralManager,
+        didDiscover peripheral: CBPeripheral,
+        advertisementData: [String: Any],
         rssi RSSI: NSNumber
     ) {
         logger.info("Discovered peripheral: \(peripheral.identifier)")
@@ -140,11 +154,16 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
         peripheral.discoverServices(nil)
     }
 
-    public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
+    public func centralManager(
+        _ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?
+    ) {
         logger.error("Failed to connect to peripheral: \(peripheral.identifier)")
     }
 
-    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
+    public func centralManager(
+        _ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral,
+        error: (any Error)?
+    ) {
         logger.info("Disconnected from peripheral 1: \(peripheral.identifier)")
         if let error {
             logger.error("Disconnect error: \(error)")
@@ -157,7 +176,8 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
         _ central: CBCentralManager,
         didDisconnectPeripheral peripheral: CBPeripheral,
         timestamp: CFAbsoluteTime,
-        isReconnecting: Bool, error: (any Error)?
+        isReconnecting: Bool,
+        error: (any Error)?
     ) {
         logger.info("Disconnected from peripheral 2: \(peripheral.identifier)")
         if let error {
@@ -203,14 +223,15 @@ extension BluetoothDataTransferService: CBPeripheralDelegate {
         }
 
         for characteristic in characteristics {
-            if characteristic.properties.contains(.write) || characteristic.properties.contains(.writeWithoutResponse) {
+            let properties = characteristic.properties
+            if properties.contains(.write) || properties.contains(.writeWithoutResponse) {
                 if let peerID = peripherals.first(where: { $0.value == peripheral })?.key {
                     writeCharacteristics[peerID] = characteristic
                     delegate?.serviceDidConnectToPeer(with: peerID)
                 }
             }
 
-            if characteristic.properties.contains(.notify) || characteristic.properties.contains(.read) {
+            if properties.contains(.notify) || properties.contains(.read) {
                 peripheral.setNotifyValue(true, for: characteristic)
             }
         }
@@ -222,11 +243,26 @@ extension BluetoothDataTransferService: CBPeripheralDelegate {
         error: Error?
     ) {
         guard error == nil, let data = characteristic.value else {
+            logger.error(
+                "Error updating value for characteristic: \(error?.localizedDescription ?? "Unknown error")"
+            )
             return
         }
 
         let peerID = peerID(for: peripheral)
         delegate?.serviceReceived(data: data, from: peerID)
+    }
+
+    public func peripheral(
+        _ peripheral: CBPeripheral,
+        didWriteValueFor characteristic: CBCharacteristic,
+        error: Error?
+    ) {
+        if let error {
+            logger.error("Error writing value for characteristic: \(error)")
+        } else {
+            logger.info("Successfully wrote value for characteristic")
+        }
     }
 
 }

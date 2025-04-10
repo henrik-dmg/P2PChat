@@ -7,8 +7,8 @@
 
 import Foundation
 import MultipeerConnectivity
-import Observation
 import OSLog
+import Observation
 
 @Observable
 public class MultipeerDataTransferService: NSObject, PeerDataTransferService {

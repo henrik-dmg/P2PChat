@@ -9,8 +9,6 @@ import MultipeerConnectivity
 
 public struct MultipeerPeer: Peer {
 
-    public typealias Phantom = String
-
     public let identifier: MCPeerID
     public let info: [String: String]?
 

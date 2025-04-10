@@ -7,8 +7,8 @@
 
 import Foundation
 import Network
-import Observation
 import OSLog
+import Observation
 
 @Observable
 public class BonjourDataTransferService: NSObject, PeerDataTransferService {

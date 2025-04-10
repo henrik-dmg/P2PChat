@@ -10,15 +10,16 @@ import Foundation
 import Observation
 
 @Observable
-public final class BluetoothAdvertisingService: BluetoothDataTransferService, PeerAdvertisingService {
+public final class BluetoothAdvertisingService: BluetoothDataTransferService, PeerAdvertisingService
+{
 
     // MARK: - Properties
 
     public let service: ServiceIdentifier
     public private(set) var state: ServiceState = .inactive
 
-    @ObservationIgnored
-    private lazy var peripheralManager = makeManager()
+    private let peripheralManager: CBPeripheralManager
+    private let peripheralQueue: DispatchQueue
     @ObservationIgnored
     private lazy var serviceID = CBUUID(string: service.rawValue)
 
@@ -26,7 +27,11 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
 
     public init(service: ServiceIdentifier, ownPeerID: PeerID) {
         self.service = service
+        self.peripheralQueue = DispatchQueue(label: "peripheralQueue")
+        self.peripheralManager = CBPeripheralManager(delegate: nil, queue: peripheralQueue, options: nil)
         super.init(ownPeerID: ownPeerID)
+        peripheralManager.delegate = self
+        peripheralManager.add(makeService())
     }
 
     // MARK: - PeerAdvertisingService
@@ -38,12 +43,10 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
         ]
 
         peripheralManager.startAdvertising(advertisementData)
-        state = .active
     }
 
     public func stopAdvertisingService() {
         peripheralManager.stopAdvertising()
-        state = .inactive
     }
 
     // MARK: - Helpers
@@ -57,14 +60,27 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
     private func makeService() -> CBMutableService {
         let transferService = CBMutableService(type: serviceID, primary: true)
 
-        let transferCharacteristic = CBMutableCharacteristic(
-            type: serviceID,
-            properties: [.write, .notify],
+        // Create separate UUIDs for read and write characteristics
+        let readCharacteristicUUID = CBUUID(string: "\(service.rawValue)-read")
+        let writeCharacteristicUUID = CBUUID(string: "\(service.rawValue)-write")
+
+        // Read characteristic for receiving data
+        let readCharacteristic = CBMutableCharacteristic(
+            type: readCharacteristicUUID,
+            properties: [.read, .notify],
+            value: nil,
+            permissions: [.readable]
+        )
+
+        // Write characteristic for sending data
+        let writeCharacteristic = CBMutableCharacteristic(
+            type: writeCharacteristicUUID,
+            properties: [.write, .writeWithoutResponse],
             value: nil,
             permissions: [.writeable]
         )
 
-        transferService.characteristics = [transferCharacteristic]
+        transferService.characteristics = [readCharacteristic, writeCharacteristic]
 
         return transferService
     }
@@ -75,8 +91,8 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
 
 extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
 
-    public func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
-        switch peripheral.state {
+    public func peripheralManagerDidUpdateState(_ peripheralManager: CBPeripheralManager) {
+        switch peripheralManager.state {
         case .poweredOn:
             logger.info("Peripheral manager is powered on")
         case .poweredOff:
@@ -90,12 +106,28 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         case .unknown:
             logger.info("Peripheral manager state is unknown")
         @unknown default:
-            logger.warning("Unknown peripheral manager state: \(String(describing: peripheral.state))")
+            logger.warning(
+                "Unknown peripheral manager state: \(String(describing: peripheralManager.state))"
+            )
         }
+
+        state = peripheralManager.isAdvertising ? .active : .inactive
     }
 
-    public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+    public func peripheralManager(
+        _ peripheral: CBPeripheralManager,
+        central: CBCentral,
+        didSubscribeTo characteristic: CBCharacteristic
+    ) {
         logger.info("Central subscribed to characteristic")
+        // When a central subscribes, we can start sending data through notifications
+        if let data = "Hello from peripheral".data(using: .utf8) {
+            peripheral.updateValue(
+                data,
+                for: characteristic as! CBMutableCharacteristic,
+                onSubscribedCentrals: [central]
+            )
+        }
     }
 
     public func peripheralManager(
@@ -106,13 +138,17 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         logger.info("Central unsubscribed from characteristic")
     }
 
-    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+    public func peripheralManager(
+        _ peripheral: CBPeripheralManager,
+        didReceiveWrite requests: [CBATTRequest]
+    ) {
         for request in requests {
             guard let data = request.value else {
                 peripheral.respond(to: request, withResult: .invalidAttributeValueLength)
                 return
             }
 
+            // Notify the delegate about received data
             delegate?.serviceReceived(data: data, from: request.central.identifier.uuidString)
             peripheral.respond(to: request, withResult: .success)
         }

@@ -10,8 +10,6 @@ import Foundation
 
 public struct BluetoothPeer: Peer {
 
-    public typealias Phantom = String
-
     public let peripheral: CBPeripheral
     public let advertisementData: [String: Any]
 

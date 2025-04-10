@@ -19,8 +19,6 @@ public struct BonjourPeer: Peer {
         let interface: NWInterface?
     }
 
-    public typealias Phantom = String
-
     // MARK: - Properties
 
     public let endpoint: NWEndpoint
