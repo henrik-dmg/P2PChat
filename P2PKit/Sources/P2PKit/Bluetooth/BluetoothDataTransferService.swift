@@ -10,18 +10,6 @@ import Foundation
 import OSLog
 import Observation
 
-public struct BluetoothService: Service {
-    public let type: CBUUID
-    public let writeCharacteristicUUID: String
-    public let readCharacteristicUUID: String
-
-    public init(type: CBUUID, writeCharacteristicUUID: String, readCharacteristicUUID: String) {
-        self.type = type
-        self.writeCharacteristicUUID = writeCharacteristicUUID
-        self.readCharacteristicUUID = readCharacteristicUUID
-    }
-}
-
 @Observable
 public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
@@ -67,14 +55,13 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         }
 
         // Add connection options to prevent pairing UI
-        let options: [String: Any] = [
-            CBConnectPeripheralOptionNotifyOnConnectionKey: false,
-            CBConnectPeripheralOptionNotifyOnDisconnectionKey: false,
-            CBConnectPeripheralOptionNotifyOnNotificationKey: false,
-        ]
+        let options: [String: Any] = [:]
+        //            CBConnectPeripheralOptionNotifyOnConnectionKey: false,
+        //            CBConnectPeripheralOptionNotifyOnDisconnectionKey: false,
+        //            CBConnectPeripheralOptionNotifyOnNotificationKey: false,
+        //        ]
 
         centralManager.connect(peer.peripheral, options: options)
-        peripherals[peer.id] = peer.peripheral
     }
 
     public func send(_ data: Data, to peerID: ID) async throws {
@@ -87,7 +74,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         // Split data into chunks if it's too large (BLE has a 20-byte limit per packet)
         let chunkSize = 20
         let chunks = stride(from: 0, to: data.count, by: chunkSize).map {
-            data[$0..<min($0 + chunkSize, data.count)]
+            data[$0 ..< min($0 + chunkSize, data.count)]
         }
 
         for chunk in chunks {
@@ -171,13 +158,17 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
     }
 
     public func centralManager(
-        _ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?
+        _ central: CBCentralManager,
+        didFailToConnect peripheral: CBPeripheral,
+        error: (any Error)?
     ) {
-        logger.error("Failed to connect to peripheral: \(peripheral.identifier)")
+        logger.error("Failed to connect to peripheral \(peripheral.identifier): \(error?.localizedDescription ?? "unknown")")
+        disconnect(from: peerID(for: peripheral))
     }
 
     public func centralManager(
-        _ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral,
+        _ central: CBCentralManager,
+        didDisconnectPeripheral peripheral: CBPeripheral,
         error: (any Error)?
     ) {
         logger.info("Disconnected from peripheral 1: \(peripheral.identifier)")

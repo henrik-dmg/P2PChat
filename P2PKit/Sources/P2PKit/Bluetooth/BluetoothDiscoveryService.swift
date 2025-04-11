@@ -19,15 +19,7 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
         Array(discoveredPeripherals.values)
     }
 
-    @ObservationIgnored
     private var discoveredPeripherals: [ID: P] = [:]
-
-    // MARK: - Init
-
-    public override init(ownPeerID: ID, service: S) {
-        super.init(ownPeerID: ownPeerID, service: service)
-        centralManager.delegate = self  // TODO: Double-check if this is needed
-    }
 
     // MARK: - PeerDiscoveryService
 
@@ -42,12 +34,21 @@ public final class BluetoothDiscoveryService: BluetoothDataTransferService, Peer
         ]
 
         centralManager.scanForPeripherals(withServices: [service.type], options: options)
+        updateState()
     }
 
     public func stopDiscoveringPeers() {
         discoveredPeripherals.removeAll()
         centralManager.stopScan()
+        updateState()
     }
+
+    // MARK: - Helpers
+
+    private func updateState() {
+        state = centralManager.isScanning ? .active : .inactive
+    }
+
 }
 
 // MARK: - CBCentralManagerDelegate
@@ -56,7 +57,8 @@ extension BluetoothDiscoveryService {
 
     public override func centralManagerDidUpdateState(_ central: CBCentralManager) {
         super.centralManagerDidUpdateState(central)
-        state = central.isScanning ? .active : .inactive
+        logger.info("Delegate is called")
+        updateState()
     }
 
     public override func centralManager(
@@ -66,11 +68,17 @@ extension BluetoothDiscoveryService {
         rssi RSSI: NSNumber
     ) {
         super.centralManager(
-            central, didDiscover: peripheral, advertisementData: advertisementData, rssi: RSSI)
+            central,
+            didDiscover: peripheral,
+            advertisementData: advertisementData,
+            rssi: RSSI
+        )
 
         let peerID = peerID(for: peripheral)
         discoveredPeripherals[peerID] = BluetoothPeer(
-            peripheral: peripheral, advertisementData: advertisementData)
+            peripheral: peripheral,
+            advertisementData: advertisementData
+        )
     }
 
 }

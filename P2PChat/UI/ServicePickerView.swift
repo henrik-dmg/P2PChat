@@ -17,13 +17,13 @@ struct ServicePickerView: View {
 
     var body: some View {
         List {
-            NavigationLink(value: NavigationDestination.peerPicker(.bluetooth, settings.name)) {
+            NavigationLink(value: NavigationDestination.peerPicker(.bluetooth)) {
                 Label("Bluetooth", systemImage: "personalhotspot")
             }
-            NavigationLink(value: NavigationDestination.peerPicker(.bonjour, settings.name)) {
+            NavigationLink(value: NavigationDestination.peerPicker(.bonjour)) {
                 Label("Bonjour", systemImage: "bonjour")
             }
-            NavigationLink(value: NavigationDestination.peerPicker(.multipeer, settings.name)) {
+            NavigationLink(value: NavigationDestination.peerPicker(.multipeer)) {
                 Label("Multipeer", systemImage: "wifi")
             }
         }

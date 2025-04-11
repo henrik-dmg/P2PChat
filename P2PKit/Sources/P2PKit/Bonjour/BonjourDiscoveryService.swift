@@ -43,7 +43,7 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
 
     func makeBrowser() -> NWBrowser {
         let parameters = NWParameters.tcp
-        parameters.includePeerToPeer = true  // Allow discovery on Bluetooth, etc.
+        parameters.includePeerToPeer = true  // Allow discovery on AWDL, etc.
 
         let descriptor = NWBrowser.Descriptor.bonjour(type: service.type, domain: nil)
         let browser = NWBrowser(for: descriptor, using: parameters)

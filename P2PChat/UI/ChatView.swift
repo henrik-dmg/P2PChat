@@ -86,10 +86,10 @@ struct ChatView<ChatPeer: Peer>: View {
 
 }
 
-struct ChatMessageCellView<ChatPeer: Peer>: View {
+struct ChatMessageCellView: View {
 
-    let message: ChatMessage<ChatPeer>
-    let ownPeerID: ChatPeer.ID
+    let message: ChatMessage
+    let ownPeerID: String
 
     var body: some View {
         HStack {
@@ -145,19 +145,19 @@ struct ChatMessageCellView<ChatPeer: Peer>: View {
         ScrollView(.vertical) {
             VStack(spacing: 8) {
                 ChatMessageCellView(
-                    message: PreviewMessage(date: .now, content: "Test message", sender: "me", recipient: "you"),
+                    message: ChatMessage(date: .now, content: "Test message", sender: "me", recipient: "you"),
                     ownPeerID: "me"
                 )
                 ChatMessageCellView(
-                    message: PreviewMessage(date: .now, content: "Test message", sender: "you", recipient: "me"),
+                    message: ChatMessage(date: .now, content: "Test message", sender: "you", recipient: "me"),
                     ownPeerID: "me"
                 )
                 ChatMessageCellView(
-                    message: PreviewMessage(date: .now, content: "Test message", sender: "me", recipient: "you"),
+                    message: ChatMessage(date: .now, content: "Test message", sender: "me", recipient: "you"),
                     ownPeerID: "me"
                 )
                 ChatMessageCellView(
-                    message: PreviewMessage(date: .now, content: "Test message", sender: "you", recipient: "me"),
+                    message: ChatMessage(date: .now, content: "Test message", sender: "you", recipient: "me"),
                     ownPeerID: "me"
                 )
             }.padding(.horizontal)

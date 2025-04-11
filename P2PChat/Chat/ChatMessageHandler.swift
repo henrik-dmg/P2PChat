@@ -12,12 +12,12 @@ import P2PKit
 @Observable
 final class ChatMessageHandler<ChatPeer: Peer> {
 
-    var chatMessages: [ChatMessage<ChatPeer>] = []
+    var chatMessages: [ChatMessage] = []
     var currentMessage = ""
     private(set) var isConnected: Bool
 
-    let peerID: ChatPeer.ID
-    var ownPeerID: ChatPeer.ID {
+    let peerID: String
+    var ownPeerID: String {
         transferService.ownPeerID
     }
 
@@ -39,8 +39,7 @@ final class ChatMessageHandler<ChatPeer: Peer> {
         guard !currentMessage.isEmpty else {
             return
         }
-        // TODO: Plugin local peerID here
-        let chatMessage = ChatMessage<ChatPeer>(date: .now, content: currentMessage, sender: transferService.ownPeerID, recipient: peerID)
+        let chatMessage = ChatMessage(date: .now, content: currentMessage, sender: transferService.ownPeerID, recipient: peerID)
         let chatData = try encoder.encode(chatMessage)
         try await transferService.send(chatData, to: peerID)
         currentMessage = ""
@@ -60,12 +59,13 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
     }
 
     func serviceReceived(data: Data, from peer: String) {
-        // TODO: Handle incomming messages here
         do {
-            let message = try decoder.decode(ChatMessage<ChatPeer>.self, from: data)
+            let message = try decoder.decode(ChatMessage.self, from: data)
             chatMessages.append(message)
         } catch {
             print("Error decoding message:" + error.localizedDescription)
+            print(String(data: data, encoding: .utf8) ?? "No UTF-8 decoding")
+            print(data.hexadecimal)
         }
     }
 
@@ -77,4 +77,14 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
         isConnected = true
     }
 
+}
+
+extension Data {
+
+    /// Hexadecimal string representation of `Data` object.
+
+    var hexadecimal: String {
+        map { String(format: "%02x", $0) }
+            .joined()
+    }
 }

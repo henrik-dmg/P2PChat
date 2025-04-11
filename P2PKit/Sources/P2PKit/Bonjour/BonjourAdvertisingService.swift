@@ -44,7 +44,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     func makeListener() throws -> NWListener {
         let parameters = NWParameters.tcp
-        parameters.includePeerToPeer = true  // Allow discovery on Bluetooth, etc.
+        parameters.includePeerToPeer = true  // Allow discovery on AWDL, etc.
 
         let service = NWListener.Service(name: "P2P Chat Service", type: service.type)
         let listener = try NWListener(service: service, using: parameters)

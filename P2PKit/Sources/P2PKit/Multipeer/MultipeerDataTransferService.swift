@@ -10,14 +10,6 @@ import MultipeerConnectivity
 import OSLog
 import Observation
 
-public struct MultipeerService: Service {
-    public let type: String
-
-    public init(type: String) {
-        self.type = type
-    }
-}
-
 @Observable
 public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 

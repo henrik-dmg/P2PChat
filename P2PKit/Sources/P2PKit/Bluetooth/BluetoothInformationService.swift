@@ -21,10 +21,8 @@ public struct BluetoothInformationService: PeerInformationService {
 
     public func peerCellView(for peer: P) -> some View {
         VStack(alignment: .leading) {
-            Text(peer.name)
-            //            if let rssi = peer.rssi {
-            //                Text("Signal Strength: \(rssi.intValue) dBm")
-            //            }
+            LabeledContent("Name", value: peer.name)
+            LabeledContent("ID", value: peer.id)
         }
     }
 
@@ -33,9 +31,6 @@ public struct BluetoothInformationService: PeerInformationService {
             List {
                 LabeledContent("Name", value: peer.name)
                 LabeledContent("ID", value: peer.id)
-                //                if let rssi = peer.rssi {
-                //                    LabeledContent("Signal Strength", value: "\(rssi.intValue) dBm")
-                //                }
             }
         }
     }

@@ -8,15 +8,15 @@
 import Foundation
 import P2PKit
 
-struct ChatMessage<ChatPeer: Peer>: Identifiable, Codable {
+struct ChatMessage: Identifiable, Codable {
 
     let id: UUID
     let date: Date
     let content: String
-    let sender: ChatPeer.ID
-    let recipient: ChatPeer.ID
+    let sender: String
+    let recipient: String
 
-    init(date: Date, content: String, sender: ChatPeer.ID, recipient: ChatPeer.ID) {
+    init(date: Date, content: String, sender: String, recipient: String) {
         self.id = UUID()
         self.date = date
         self.content = content
@@ -25,11 +25,3 @@ struct ChatMessage<ChatPeer: Peer>: Identifiable, Codable {
     }
 
 }
-
-struct PreviewPeer: Peer {
-
-    let id: String
-
-}
-
-typealias PreviewMessage = ChatMessage<PreviewPeer>
