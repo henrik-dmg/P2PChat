@@ -94,8 +94,6 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 extension MultipeerDataTransferService: MCSessionDelegate {
 
     public func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
-        //connectedPeers = session.connectedPeers.map { $0.displayName }
-
         switch state {
         case .notConnected:
             connections[peerID.displayName] = nil

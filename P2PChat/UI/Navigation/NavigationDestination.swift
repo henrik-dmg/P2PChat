@@ -28,10 +28,14 @@ enum NavigationDestination: Hashable {
         case let .advertising(serviceType, ownPeerID):
             switch serviceType {
             case .bluetooth:
+                #if os(visionOS)
+                Text("Advertising via Bluetooth is not supported on visionOS.")
+                #else
                 PeerAdvertisingView(
                     service: BluetoothAdvertisingService(ownPeerID: ownPeerID, service: .bluetooth),
                     informationService: BluetoothInformationService()
                 )
+                #endif
             case .bonjour:
                 PeerAdvertisingView(
                     service: BonjourAdvertisingService(ownPeerID: ownPeerID, service: .bonjour),

@@ -10,6 +10,7 @@ import Foundation
 import Observation
 
 @Observable
+@available(visionOS, unavailable)
 public final class BluetoothAdvertisingService: BluetoothDataTransferService, PeerAdvertisingService {
 
     // MARK: - Properties
@@ -42,7 +43,7 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
         let writeCharacteristicUUID = CBUUID(string: service.writeCharacteristicUUID)
 
         // Write characteristic for sending data
-        return CBMutableCharacteristic(
+        return CBMutableCharacteristic.init(
             type: writeCharacteristicUUID,
             properties: [.write, .writeWithoutResponse],
             value: nil,
@@ -95,6 +96,7 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
 
 // MARK: - CBPeripheralManagerDelegate
 
+@available(visionOS, unavailable)
 extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
 
     public func peripheralManagerDidUpdateState(_ peripheralManager: CBPeripheralManager) {

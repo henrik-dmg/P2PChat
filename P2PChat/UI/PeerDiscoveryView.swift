@@ -46,7 +46,11 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 }
             }
             ForEach(service.availablePeers) { peer in
-                peerCellView(peer)
+#if os(iOS)
+                swipeActionPeerCellView(peer)
+#else
+                buttonActionPeerCellView(peer)
+#endif
             }
         }
         .navigationTitle("Discovery")
@@ -76,22 +80,34 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
         }
     }
 
-    @ViewBuilder
-    private func peerCellView(_ peer: ChatPeer) -> some View {
+    private func swipeActionPeerCellView(_ peer: ChatPeer) -> some View {
         informationService.peerCellView(for: peer).swipeActions {
-            Button {
-                service.connect(to: peer)
-            } label: {
-                Label("Info", systemImage: "bubble.fill")
-            }
-            .tint(.green)
-            Button {
-                sheetContent = .inspect(peer)
-            } label: {
-                Label("Info", systemImage: "person.fill.questionmark")
-            }
-            .tint(.blue)
+            peerCellViewButtons(peer)
         }
+    }
+
+    private func buttonActionPeerCellView(_ peer: ChatPeer) -> some View {
+        HStack {
+            informationService.peerCellView(for: peer)
+            Spacer()
+            peerCellViewButtons(peer)
+        }
+    }
+
+    @ViewBuilder
+    private func peerCellViewButtons(_ peer: ChatPeer) -> some View {
+        Button {
+            service.connect(to: peer)
+        } label: {
+            Label("Connect", systemImage: "bubble.fill")
+        }
+        .tint(.green)
+        Button {
+            sheetContent = .inspect(peer)
+        } label: {
+            Label("Info", systemImage: "person.fill.questionmark")
+        }
+        .tint(.blue)
     }
 
 }
