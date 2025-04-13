@@ -74,7 +74,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
         // Split data into chunks if it's too large (BLE has a 20-byte limit per packet)
         let chunkSize = 20
         let chunks = stride(from: 0, to: data.count, by: chunkSize).map {
-            data[$0 ..< min($0 + chunkSize, data.count)]
+            data[$0..<min($0 + chunkSize, data.count)]
         }
 
         for chunk in chunks {

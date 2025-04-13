@@ -10,10 +10,13 @@ import SwiftUI
 struct AsyncButton<Label: View>: View {
     var action: () async -> Void
     var actionOptions = Set(ActionOption.allCases)
-    @ViewBuilder var label: () -> Label
+    @ViewBuilder
+    var label: () -> Label
 
-    @State private var isDisabled = false
-    @State private var showProgressView = false
+    @State
+    private var isDisabled = false
+    @State
+    private var showProgressView = false
 
     var body: some View {
         Button(

@@ -27,10 +27,12 @@ enum SheetContent<ChatPeer: Peer>: Identifiable {
 
 struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
-    @State var service: any PeerDiscoveryService<ChatPeer>
+    @State
+    var service: any PeerDiscoveryService<ChatPeer>
     let informationService: InformationService
 
-    @State private var sheetContent: SheetContent<ChatPeer>?
+    @State
+    private var sheetContent: SheetContent<ChatPeer>?
 
     var body: some View {
         List {
@@ -46,11 +48,11 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 }
             }
             ForEach(service.availablePeers) { peer in
-#if os(iOS)
+                #if os(iOS)
                 swipeActionPeerCellView(peer)
-#else
+                #else
                 buttonActionPeerCellView(peer)
-#endif
+                #endif
             }
         }
         .navigationTitle("Discovery")

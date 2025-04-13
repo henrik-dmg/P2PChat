@@ -9,11 +9,15 @@ import SwiftUI
 
 struct NameOnboardingView: View {
 
-    @State private var editingName = ""
+    @State
+    private var editingName = ""
 
-    @Environment(Settings.self) private var settings
-    @Environment(NavigationRouter.self) private var router
-    @Environment(\.dismiss) private var dismiss
+    @Environment(Settings.self)
+    private var settings
+    @Environment(NavigationRouter.self)
+    private var router
+    @Environment(\.dismiss)
+    private var dismiss
 
     var body: some View {
         List {

@@ -10,12 +10,17 @@ import SwiftUI
 
 struct ChatView<ChatPeer: Peer>: View {
 
-    @State private var chatMessageHandler: ChatMessageHandler<ChatPeer>
+    @State
+    private var chatMessageHandler: ChatMessageHandler<ChatPeer>
 
-    @State private var isPresentingAlert = false
-    @State private var errorDescription: String?
-    @Environment(\.dismiss) private var dismiss
-    @State private var sendTask: Task<Void, Error>?
+    @State
+    private var isPresentingAlert = false
+    @State
+    private var errorDescription: String?
+    @Environment(\.dismiss)
+    private var dismiss
+    @State
+    private var sendTask: Task<Void, Error>?
 
     init(service: any PeerDataTransferService<ChatPeer>, peerID: String) {
         self.chatMessageHandler = ChatMessageHandler(peerID: peerID, transferService: service)

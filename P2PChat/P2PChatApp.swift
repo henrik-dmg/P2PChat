@@ -20,8 +20,10 @@ struct P2PChatApp: App {
 
 struct ContentView: View {
 
-    @State private var router = NavigationRouter()
-    @State private var settings = Settings()
+    @State
+    private var router = NavigationRouter()
+    @State
+    private var settings = Settings()
 
     var body: some View {
         NavigationStack(path: $router.path) {

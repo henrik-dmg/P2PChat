@@ -12,7 +12,8 @@ struct PeerPickerView: View {
 
     let serviceType: ServiceType
 
-    @Environment(Settings.self) private var settings
+    @Environment(Settings.self)
+    private var settings
 
     var body: some View {
         List {

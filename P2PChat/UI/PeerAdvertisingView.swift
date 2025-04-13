@@ -11,10 +11,12 @@ import SwiftUI
 
 struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
-    @State var service: any PeerAdvertisingService<ChatPeer>
+    @State
+    var service: any PeerAdvertisingService<ChatPeer>
     let informationService: InformationService
 
-    @State private var sheetContent: SheetContent<ChatPeer>?
+    @State
+    private var sheetContent: SheetContent<ChatPeer>?
 
     var body: some View {
         List {

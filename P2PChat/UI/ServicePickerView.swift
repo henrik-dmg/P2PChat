@@ -10,10 +10,13 @@ import SwiftUI
 
 struct ServicePickerView: View {
 
-    @Environment(NavigationRouter.self) var router
-    @Environment(Settings.self) var settings
+    @Environment(NavigationRouter.self)
+    var router
+    @Environment(Settings.self)
+    var settings
 
-    @State private var isPresentingNamePicker = false
+    @State
+    private var isPresentingNamePicker = false
 
     var body: some View {
         List {
@@ -51,8 +54,12 @@ struct ServicePickerView: View {
 }
 
 #Preview {
-    @Previewable @State var router = NavigationRouter()
-    @Previewable @State var settings = Settings()
+    @Previewable
+    @State
+    var router = NavigationRouter()
+    @Previewable
+    @State
+    var settings = Settings()
 
     NavigationStack(path: $router.path) {
         router.rootView()
