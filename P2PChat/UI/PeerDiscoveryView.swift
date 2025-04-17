@@ -48,37 +48,32 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 }
             }
             ForEach(service.availablePeers) { peer in
-                #if os(iOS)
+#if os(iOS)
                 swipeActionPeerCellView(peer)
-                #else
+#else
                 buttonActionPeerCellView(peer)
-                #endif
+#endif
             }
         }
         .navigationTitle("Discovery")
         .sheet(item: $sheetContent) { content in
             switch content {
             case let .chat(peerIDs):
-                NavigationStack {
-                    TabView {
-                        ForEach(peerIDs, id: \.self) { peerID in
-                            ChatView(service: service, peerID: peerID)
-                        }
-                    }
-                }
+                ChatsListView(peerIDs: peerIDs, service: service)
             case let .inspect(peer):
                 informationService.peerInformationView(for: peer)
             }
         }
         .onChange(of: service.connectedPeers) { oldValue, newValue in
-            guard !newValue.isEmpty else {
+            if newValue.isEmpty {
                 if case .chat = sheetContent {
+                    service.disconnectAll()
                     self.sheetContent = nil
                 }
-                return
+            } else {
+                service.stopDiscoveringPeers()
+                self.sheetContent = .chat(newValue)
             }
-            service.stopDiscoveringPeers()
-            self.sheetContent = .chat(newValue)
         }
     }
 

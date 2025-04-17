@@ -13,7 +13,18 @@ public protocol PeerAdvertisingService<P>: PeerDataTransferService {
 
     var state: ServiceState { get }
 
+    var advertisingDelegate: (any PeerAdvertisingServiceDelegate<Self.S>)? { get set }
+
     func startAdvertisingService()
     func stopAdvertisingService()
+
+}
+
+public protocol PeerAdvertisingServiceDelegate<S>: AnyObject {
+
+    associatedtype S: Service
+
+    func serviceDidStartAdvertising(_ service: Service)
+    func serviceDidStopAdvertising(_ service: Service)
 
 }

@@ -84,6 +84,7 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     public func disconnect(from peerID: ID) {
         guard let peripheral = peripherals[peerID] else {
+            logger.error("No peripheral \(peerID) to disconnect from")
             return
         }
 
@@ -104,6 +105,8 @@ public class BluetoothDataTransferService: NSObject, PeerDataTransferService {
 
     private func handlePeripheralConnected(_ peripheral: CBPeripheral) {
         let peerID = peerID(for: peripheral)
+        peripheral.delegate = self
+        peripheral.discoverServices(nil)
         peripherals[peerID] = peripheral
         // We're not calling the delegate here, because we are connected, but didn't discover write characteristics yet
     }
@@ -153,8 +156,6 @@ extension BluetoothDataTransferService: CBCentralManagerDelegate {
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         logger.info("Connected to peripheral: \(peripheral.identifier)")
         handlePeripheralConnected(peripheral)
-        peripheral.delegate = self
-        peripheral.discoverServices(nil)
     }
 
     public func centralManager(

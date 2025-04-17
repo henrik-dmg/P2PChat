@@ -42,6 +42,7 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
         self.ownPeerID = ownPeerID
         self.service = service
         super.init()
+
     }
 
     // MARK: - PeerDataTransferService

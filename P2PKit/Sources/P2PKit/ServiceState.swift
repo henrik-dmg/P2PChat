@@ -21,3 +21,20 @@ public enum ServiceState {
     }
 
 }
+
+// MARK: - Equatable
+
+extension ServiceState: Equatable {
+
+    public static func == (lhs: ServiceState, rhs: ServiceState) -> Bool {
+        switch (lhs, rhs) {
+        case (.active, .active), (.inactive, .inactive):
+            return true
+        case let (.error(lhsError), .error(rhsError)):
+            return "\(lhsError)" == "\(rhsError)"
+        default:
+            return false
+        }
+    }
+
+}

@@ -17,6 +17,8 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
 
     public private(set) var state: ServiceState = .inactive
 
+    public weak var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
+
     private let peripheralManager: CBPeripheralManager
     private let peripheralQueue: DispatchQueue
 
@@ -75,8 +77,7 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
     public func stopAdvertisingService() {
         peripheralManager.stopAdvertising()
         peripheralQueue.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.logger.info("Peripheral manager stopped advertising")
-            self?.updateState()
+            self?.updateState(self?.peripheralManager.isAdvertising == true ? .active : .inactive)
         }
     }
 
@@ -88,8 +89,18 @@ public final class BluetoothAdvertisingService: BluetoothDataTransferService, Pe
         return transferService
     }
 
-    private func updateState() {
-        state = peripheralManager.isAdvertising ? .active : .inactive
+    private func updateState(_ newState: ServiceState) {
+        switch newState {
+        case .active:
+            logger.info("Peripheral manager started advertising")
+            advertisingDelegate?.serviceDidStartAdvertising(service)
+        case .inactive:
+            logger.info("Peripheral manager stopped advertising")
+            advertisingDelegate?.serviceDidStopAdvertising(service)
+        case let .error(error):
+            logger.error("Advertiser did not start: \(error)")
+        }
+        state = newState
     }
 
 }
@@ -119,7 +130,7 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
             )
         }
 
-        updateState()
+        updateState(peripheralManager.isAdvertising ? .active : .inactive)
     }
 
     public func peripheralManager(
@@ -167,8 +178,11 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
     }
 
     public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: (any Error)?) {
-        logger.info("Peripheral manager started advertising \(peripheral.isAdvertising)")
-        updateState()
+        if let error {
+            updateState(.error(error))
+            return
+        }
+        updateState(.active)
     }
 
 }

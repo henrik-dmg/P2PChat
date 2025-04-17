@@ -17,8 +17,7 @@ struct ChatView<ChatPeer: Peer>: View {
     private var isPresentingAlert = false
     @State
     private var errorDescription: String?
-    @Environment(\.dismiss)
-    private var dismiss
+    
     @State
     private var sendTask: Task<Void, Error>?
 
@@ -27,41 +26,32 @@ struct ChatView<ChatPeer: Peer>: View {
     }
 
     var body: some View {
-        VStack {
-            ScrollView(.vertical) {
-                VStack(spacing: 8) {
-                    ForEach(chatMessageHandler.chatMessages) { message in
-                        ChatMessageCellView(message: message, ownPeerID: chatMessageHandler.ownPeerID)
-                    }
-                    if chatMessageHandler.chatMessages.isEmpty {
-                        Text("No messages yet.")
-                            .font(.subheadline)
-                    }
-                }.padding(.horizontal)
-            }.defaultScrollAnchor(.bottom)
-            textFieldContainer
+        ZStack(alignment: .top) {
+            VStack(spacing: 0) {
+                ScrollView(.vertical) {
+                    VStack(spacing: 8) {
+                        ForEach(chatMessageHandler.chatMessages) { message in
+                            ChatMessageCellView(message: message, ownPeerID: chatMessageHandler.ownPeerID)
+                        }
+                        if chatMessageHandler.chatMessages.isEmpty {
+                            Text("No messages yet.")
+                                .font(.subheadline)
+                        }
+                    }.padding(.horizontal)
+
+                }.defaultScrollAnchor(.bottom)
+                textFieldContainer
+            }
         }
-        .navigationTitle("Chat")
-        .onDisappear {
-            chatMessageHandler.onDisappear()
-        }
+        .navigationTitle(chatMessageHandler.peerID)
+        .frame(minHeight: 200)
     }
 
     private var textFieldContainer: some View {
         HStack(spacing: 12) {
             TextField("Message", text: $chatMessageHandler.currentMessage)
                 .onSubmit {
-                    let task = Task {
-                        guard !chatMessageHandler.currentMessage.isEmpty else {
-                            return
-                        }
-                        try await chatMessageHandler.sendMessage()
-                    }
-                    let currentTask = self.sendTask
-                    sendTask = Task {
-                        _ = try await currentTask?.value
-                        _ = try await task.value
-                    }
+                    send()
                 }
                 .textFieldStyle(.roundedBorder)
             sendButton(title: "Send")
@@ -77,15 +67,24 @@ struct ChatView<ChatPeer: Peer>: View {
     }
 
     private func sendButton(title: LocalizedStringKey) -> some View {
-        AsyncButton {
-            do {
-                try await chatMessageHandler.sendMessage()
-            } catch {
-                print("Sending failed, show error in UI", error)
-                errorDescription = error.localizedDescription
-            }
+        Button {
+            send()
         } label: {
             Label(title, systemImage: "paperplane")
+        }
+    }
+
+    private func send() {
+        let task = Task {
+            guard !chatMessageHandler.currentMessage.isEmpty else {
+                return
+            }
+            try await chatMessageHandler.sendMessage()
+        }
+        let currentTask = self.sendTask
+        sendTask = Task {
+            _ = try await currentTask?.value
+            _ = try await task.value
         }
     }
 

@@ -91,6 +91,7 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
 
     public func disconnect(from peerID: P.ID) {
         guard let connection = connections[peerID] else {
+            logger.error("No connection to \(peerID) to cancel")
             return
         }
         connection.cancel()
@@ -98,7 +99,8 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     }
 
     public func disconnectAll() {
-        for id in connections.keys {
+        let ids = connections.keys
+        for id in ids {
             disconnect(from: id)
         }
     }

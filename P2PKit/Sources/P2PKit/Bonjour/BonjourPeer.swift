@@ -55,7 +55,7 @@ public struct BonjourPeer: Peer {
 extension BonjourPeer {
 
     public static func preview() -> Self {
-        BonjourPeer(endpoint: .service(name: "P2P Chat Servuce", type: "_p2p._tcp", domain: "local.", interface: nil))
+        BonjourPeer(endpoint: .service(name: "P2P Chat Service", type: "_p2p._tcp", domain: "local.", interface: nil))
     }
 
 }

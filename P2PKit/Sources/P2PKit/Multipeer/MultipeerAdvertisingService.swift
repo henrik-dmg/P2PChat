@@ -15,6 +15,8 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     public private(set) var state: ServiceState = .inactive
 
+    public var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
+
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
 
@@ -22,12 +24,12 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     public func startAdvertisingService() {
         advertiser.startAdvertisingPeer()
-        state = .active
+        updateState(.active)
     }
 
     public func stopAdvertisingService() {
         advertiser.stopAdvertisingPeer()
-        state = .inactive
+        updateState(.inactive)
     }
 
     // MARK: - Helpers
@@ -36,6 +38,20 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
         let advertiser = MCNearbyServiceAdvertiser(peer: ownMCPeerID, discoveryInfo: nil, serviceType: service.type)
         advertiser.delegate = self
         return advertiser
+    }
+
+    private func updateState(_ newState: ServiceState) {
+        switch newState {
+        case .active:
+            logger.info("Service added")
+            advertisingDelegate?.serviceDidStartAdvertising(service)
+        case .inactive:
+            logger.info("Service removed")
+            advertisingDelegate?.serviceDidStopAdvertising(service)
+        case let .error(error):
+            logger.error("Advertiser did not start: \(error)")
+        }
+        state = newState
     }
 
 }
@@ -53,8 +69,8 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
     }
 
     public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
-        logger.error("Advertiser did not start: \(error)")
-        state = .error(error)
+
+        updateState(.error(error))
     }
 
 }

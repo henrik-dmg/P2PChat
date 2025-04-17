@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		26482DDD2D92D6F30059019C /* P2PKit in Frameworks */ = {isa = PBXBuildFile; productRef = 26482DDC2D92D6F30059019C /* P2PKit */; };
 		26482DDF2D92DED60059019C /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26482DDE2D92DED60059019C /* AsyncButton.swift */; };
+		264D71FE2DB1969700E5E771 /* ChatsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264D71FD2DB1969700E5E771 /* ChatsListView.swift */; };
 		266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */; };
 		266192672D7B2B8C00CFC6D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */; };
 		266192682D7B2B8C00CFC6D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 266192602D7B2B8C00CFC6D7 /* Assets.xcassets */; };
@@ -29,6 +30,7 @@
 /* Begin PBXFileReference section */
 		26482DDA2D92D6990059019C /* P2PKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = P2PKit; sourceTree = "<group>"; };
 		26482DDE2D92DED60059019C /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
+		264D71FD2DB1969700E5E771 /* ChatsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsListView.swift; sourceTree = "<group>"; };
 		2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		266192602D7B2B8C00CFC6D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		266192622D7B2B8C00CFC6D7 /* P2PChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PChat.entitlements; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				266328832D94B327008A3F55 /* PeerPickerView.swift */,
 				2661927A2D7B45B400CFC6D7 /* ServicePickerView.swift */,
 				26F3560C2D95660900496DAF /* Navigation */,
+				264D71FD2DB1969700E5E771 /* ChatsListView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -234,6 +237,7 @@
 				26F356112D95680F00496DAF /* Settings.swift in Sources */,
 				26F3560B2D9565FF00496DAF /* NavigationDestination.swift in Sources */,
 				2661927B2D7B45BF00CFC6D7 /* ServicePickerView.swift in Sources */,
+				264D71FE2DB1969700E5E771 /* ChatsListView.swift in Sources */,
 				266192782D7B429100CFC6D7 /* ChatView.swift in Sources */,
 				26F3560E2D95675600496DAF /* Constants.swift in Sources */,
 				266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */,

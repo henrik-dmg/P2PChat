@@ -15,6 +15,8 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     public private(set) var state: ServiceState = .inactive
 
+    public var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
+
     @ObservationIgnored
     private var listener: NWListener?
     @ObservationIgnored
@@ -46,7 +48,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true  // Allow discovery on AWDL, etc.
 
-        let service = NWListener.Service(name: "P2P Chat Service", type: service.type)
+        let service = NWListener.Service(name: ownPeerID, type: service.type)
         let listener = try NWListener(service: service, using: parameters)
         listener.stateUpdateHandler = { [weak self] (newState: NWListener.State) in
             guard let self else {
@@ -80,17 +82,29 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
             guard let self else { return }
             switch registrationState {
             case .add:
-                logger.info("Service added")
-                state = .active
+                updateState(.active)
             case .remove:
-                logger.info("Service removed")
-                state = .inactive
+                updateState(.inactive)
             @unknown default:
                 logger.warning("Unknown service registration state: \(String(describing: registrationState))")
             }
         }
 
         return listener
+    }
+
+    private func updateState(_ newState: ServiceState) {
+        switch newState {
+        case .active:
+            logger.info("Service added")
+            advertisingDelegate?.serviceDidStartAdvertising(service)
+        case .inactive:
+            logger.info("Service removed")
+            advertisingDelegate?.serviceDidStopAdvertising(service)
+        case let .error(error):
+            logger.error("Advertiser did not start: \(error)")
+        }
+        state = newState
     }
 
 }
