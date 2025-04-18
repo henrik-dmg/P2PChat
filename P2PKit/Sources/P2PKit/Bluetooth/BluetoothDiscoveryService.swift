@@ -25,16 +25,18 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
     public let service: S
     public weak var delegate: PeerDataTransferServiceDelegate?
 
-    public var availablePeers: [BluetoothPeer] {
+    public var availablePeers: [P] {
         Array(discoveredPheripherals.values)
     }
     public var connectedPeers: [ID] {
         Array(connectedPheripherals.keys)
     }
 
-    private var discoveredPheripherals: [ID: BluetoothPeer] = [:]
+    private var discoveredPheripherals: [ID: P] = [:]
     private var connectedPheripherals: [ID: CBPeripheral] = [:]
+    @ObservationIgnored
     private var writeCharacteristics: [ID: CBCharacteristic] = [:]
+    @ObservationIgnored
     private var receivedData: [ID: Data] = [:]
     private let centralManager: CBCentralManager
     private let centralsQueue: DispatchQueue
@@ -69,6 +71,7 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
 
     public func stopDiscoveringPeers() {
         centralManager.stopScan()
+        discoveredPheripherals.removeAll()
         updateState()
     }
 
@@ -87,7 +90,7 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
         peripheral.delegate = self
         peripheral.discoverServices(nil)
         connectedPheripherals[peerID] = peripheral
-        // Not notifying delegate about connection here because we need to discover services and characteristics first
+        delegate?.serviceDidConnectToPeer(with: peerID)
     }
 
     private func handlePeripheralDisconnected(_ peripheral: CBPeripheral) {
@@ -156,8 +159,8 @@ extension BluetoothDiscoveryService: PeerDataTransferService {
 
 extension BluetoothDiscoveryService: CBCentralManagerDelegate {
 
-    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        switch central.state {
+    public func centralManagerDidUpdateState(_ centralManager: CBCentralManager) {
+        switch centralManager.state {
         case .poweredOn:
             logger.info("Bluetooth is powered on")
         case .poweredOff:
@@ -176,17 +179,12 @@ extension BluetoothDiscoveryService: CBCentralManagerDelegate {
     }
 
     public func centralManager(
-        _ central: CBCentralManager,
+        _ centralManager: CBCentralManager,
         didDiscover peripheral: CBPeripheral,
         advertisementData: [String: Any],
         rssi RSSI: NSNumber
     ) {
         logger.info("Discovered peripheral: \(peripheral.identifier) with RSSI \(RSSI)")
-
-        if RSSI.intValue >= -50 {
-            logger.warning("Discovered perhiperal not in expected range, at \(RSSI)")
-        }
-
         let peerID = peerID(for: peripheral)
         discoveredPheripherals[peerID] = BluetoothPeer(
             peripheral: peripheral,
@@ -194,27 +192,25 @@ extension BluetoothDiscoveryService: CBCentralManagerDelegate {
         )
     }
 
-    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        logger.info("Connected to peripheral: \(peripheral.identifier)")
+    public func centralManager(_ centralManager: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        logger.info("Connected to peripheral: \(peripheral.safeName)")
         handlePeripheralConnected(peripheral)
     }
 
     public func centralManager(
-        _ central: CBCentralManager,
+        _ centralManager: CBCentralManager,
         didFailToConnect peripheral: CBPeripheral,
         error: (any Error)?
     ) {
-        logger.error(
-            "Failed to connect to peripheral \(peripheral.identifier): \(error?.localizedDescription ?? "unknown")"
-        )
+        logger.error("Failed to connect to peripheral \(peripheral.safeName): \(error?.localizedDescription ?? "unknown")")
     }
 
     public func centralManager(
-        _ central: CBCentralManager,
+        _ centralManager: CBCentralManager,
         didDisconnectPeripheral peripheral: CBPeripheral,
         error: (any Error)?
     ) {
-        logger.info("Disconnected from peripheral 1: \(peripheral.identifier)")
+        logger.info("Disconnected from peripheral 1: \(peripheral.safeName)")
         if let error {
             logger.error("Disconnect error 1: \(error)")
         }
@@ -222,13 +218,13 @@ extension BluetoothDiscoveryService: CBCentralManagerDelegate {
     }
 
     public func centralManager(
-        _ central: CBCentralManager,
+        _ centralManager: CBCentralManager,
         didDisconnectPeripheral peripheral: CBPeripheral,
         timestamp: CFAbsoluteTime,
         isReconnecting: Bool,
         error: (any Error)?
     ) {
-        logger.info("Disconnected from peripheral 2: \(peripheral.identifier)")
+        logger.info("Disconnected from peripheral 2: \(peripheral.safeName)")
         if let error {
             logger.error("Disconnect error 2: \(error)")
         }
@@ -271,12 +267,13 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
             return
         }
 
+        logger.info("Discovered \(characteristics.count) characteristics for peripheral \(peripheral.safeName)")
+
         for characteristic in characteristics {
             let properties = characteristic.properties
             if properties.contains(.write) || properties.contains(.writeWithoutResponse) {
-                if let peerID = discoveredPheripherals.first(where: { $0.value.peripheral == peripheral })?.key {
+                if let peerID = connectedPheripherals.first(where: { $0.value == peripheral })?.key {
                     writeCharacteristics[peerID] = characteristic
-                    delegate?.serviceDidConnectToPeer(with: peerID)
                 }
             }
 
@@ -303,23 +300,23 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
         let peerID = peerID(for: peripheral)
         logger.debug("Received \(characteristicData.count)")
 
-        // Have we received the end-of-message token?
-        if stringFromData == "EOM" {
-            // End-of-message case: show the data.
-            // Dispatch the text view update to the main queue for updating the UI, because
-            // we don't know which thread this method will be called back on.
-            if let receivedData = receivedData[peerID] {
-                self.receivedData[peerID] = nil
-                delegate?.serviceReceived(data: receivedData, from: peerID)
-            }
-        } else {
-            // Otherwise, just append the data to what we have previously received.
-            if receivedData[peerID] != nil {
-                receivedData[peerID]?.append(characteristicData)
-            } else {
-                receivedData[peerID] = characteristicData
-            }
-        }
+        //        // Have we received the end-of-message token?
+        //        if stringFromData == "EOM" {
+        //            // End-of-message case: show the data.
+        //            // Dispatch the text view update to the main queue for updating the UI, because
+        //            // we don't know which thread this method will be called back on.
+        //            if let receivedData = receivedData[peerID] {
+        //                self.receivedData[peerID] = nil
+        //                delegate?.serviceReceived(data: receivedData, from: peerID)
+        //            }
+        //        } else {
+        //            // Otherwise, just append the data to what we have previously received.
+        //            if receivedData[peerID] != nil {
+        //                receivedData[peerID]?.append(characteristicData)
+        //            } else {
+        //                receivedData[peerID] = characteristicData
+        //            }
+        //        }
     }
 
     public func peripheral(

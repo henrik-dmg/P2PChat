@@ -14,8 +14,12 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
     // MARK: - Properties
 
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers: [P] = []
 
+    public var availablePeers: [P] {
+        Array(discoveredPeers.values)
+    }
+
+    private var discoveredPeers: [ID: P] = [:]
     @ObservationIgnored
     private var browser: NWBrowser?
     @ObservationIgnored
@@ -35,13 +39,13 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
     public func stopDiscoveringPeers() {
         browser?.cancel()
         browser = nil
-        availablePeers = []
+        discoveredPeers.removeAll()
         state = .inactive
     }
 
     // MARK: - Helpers
 
-    func makeBrowser() -> NWBrowser {
+    private func makeBrowser() -> NWBrowser {
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true  // Allow discovery on AWDL, etc.
 
@@ -70,32 +74,29 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
                 switch change {
                 case let .added(result):
                     let peer = BonjourPeer(endpoint: result.endpoint)
-                    print("+ \(peer.id)")
-                    print("+ \(result.interfaces)")
-                    self?.availablePeers.append(peer)
+
+                    self?.logger.debug("+ \(peer.id)")
+                    self?.logger.debug("+ \(result.interfaces.debugDescription)")
+
+                    self?.discoveredPeers[peer.id] = peer
                 case let .removed(result):
                     let peer = BonjourPeer(endpoint: result.endpoint)
-                    print("- \(peer.id)")
-                    print("- \(result.interfaces)")
-                    self?.availablePeers.removeAll { peer in
-                        peer.endpoint == result.endpoint
-                    }
+
+                    self?.logger.debug("- \(peer.id)")
+                    self?.logger.debug("- \(result.interfaces)")
+
+                    self?.discoveredPeers[peer.id] = nil
                 case let .changed(old, new, flags):
                     let oldPeer = BonjourPeer(endpoint: old.endpoint)
                     let newPeer = BonjourPeer(endpoint: new.endpoint)
 
-                    print("± \(oldPeer.id) -> \(newPeer.id)")
-                    print("± \(old.endpoint) -> \(new.endpoint)")
-                    print("± \(flags)")
-                    print("± \(old.interfaces) -> \(new.interfaces)")
-                    let peerIndex = self?.availablePeers.firstIndex { peer in
-                        peer.endpoint == old.endpoint
-                    }
-                    guard let peerIndex else {
-                        continue
-                    }
-                    print("Updating peer")
-                    self?.availablePeers[peerIndex] = newPeer
+                    self?.logger.debug("± \(oldPeer.id) -> \(newPeer.id)")
+                    self?.logger.debug("± \(old.endpoint.debugDescription) -> \(new.endpoint.debugDescription)")
+                    self?.logger.debug("± \(String(describing: flags))")
+                    self?.logger.debug("± \(old.interfaces.debugDescription) -> \(new.interfaces.debugDescription)")
+
+                    self?.discoveredPeers[oldPeer.id] = nil
+                    self?.discoveredPeers[newPeer.id] = newPeer
                 case .identical:
                     continue
                 @unknown default:

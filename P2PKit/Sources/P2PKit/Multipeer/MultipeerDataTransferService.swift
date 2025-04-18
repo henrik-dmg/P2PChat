@@ -92,6 +92,8 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
 
 }
 
+// MARK: - MCSessionDelegate
+
 extension MultipeerDataTransferService: MCSessionDelegate {
 
     public func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
@@ -99,13 +101,13 @@ extension MultipeerDataTransferService: MCSessionDelegate {
         case .notConnected:
             connections[peerID.displayName] = nil
             delegate?.serviceDidDisconnectFromPeer(with: peerID.displayName)
-            logger.info("Peer \(peerID) disconnected")
+            logger.info("Peer \(peerID.displayName) disconnected")
         case .connecting:
-            logger.info("Peer \(peerID) connecting")
+            logger.info("Peer \(peerID.displayName) connecting")
         case .connected:
             connections[peerID.displayName] = peerID
             delegate?.serviceDidConnectToPeer(with: peerID.displayName)
-            logger.info("Peer \(peerID) connected")
+            logger.info("Peer \(peerID.displayName) connected")
         @unknown default:
             logger.warning("Unknown connection state: \(String(describing: state))")
         }
@@ -113,7 +115,7 @@ extension MultipeerDataTransferService: MCSessionDelegate {
 
     public func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
         delegate?.serviceReceived(data: data, from: peerID.displayName)
-        logger.info("Received data from \(peerID)")
+        logger.info("Received data from \(peerID.displayName)")
     }
 
     public func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {

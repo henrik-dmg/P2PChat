@@ -14,8 +14,7 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
     // MARK: - Properties
 
     public private(set) var state: ServiceState = .inactive
-
-    public var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
+    public weak var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
 
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
@@ -56,6 +55,8 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
 }
 
+// MARK: - MCNearbyServiceAdvertiserDelegate
+
 extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
 
     public func advertiser(
@@ -69,7 +70,7 @@ extension MultipeerAdvertisingService: MCNearbyServiceAdvertiserDelegate {
     }
 
     public func advertiser(_ advertiser: MCNearbyServiceAdvertiser, didNotStartAdvertisingPeer error: any Error) {
-
+        logger.error("Advertiser did not start advertising service: \(error)")
         updateState(.error(error))
     }
 

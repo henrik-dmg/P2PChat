@@ -81,7 +81,6 @@ public final class BluetoothAdvertisingService: NSObject, PeerAdvertisingService
             CBAdvertisementDataServiceUUIDsKey: [cbService.uuid],
             CBAdvertisementDataLocalNameKey: ownPeerID,
         ]
-
         peripheralManager.startAdvertising(advertisementData)
     }
 
@@ -208,7 +207,7 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
     }
 
     public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
-        logger.info("Central subscribed to characteristic")
+        logger.info("Central subscribed to characteristic \(characteristic.uuid)")
         handlePeripheralConnected(central)
     }
 
@@ -217,11 +216,12 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         central: CBCentral,
         didUnsubscribeFrom characteristic: CBCharacteristic
     ) {
-        logger.info("Central unsubscribed from characteristic")
+        logger.info("Central unsubscribed from characteristic \(characteristic.uuid)")
         handlePeripheralDisconnected(central)
     }
 
     public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        logger.info("Peripheral manager received \(requests.count) write requests")
         for request in requests {
             guard let data = request.value else {
                 peripheral.respond(to: request, withResult: .invalidAttributeValueLength)

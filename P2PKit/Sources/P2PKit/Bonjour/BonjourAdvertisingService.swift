@@ -14,8 +14,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
     // MARK: - Properties
 
     public private(set) var state: ServiceState = .inactive
-
-    public var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
+    public weak var advertisingDelegate: (any PeerAdvertisingServiceDelegate<S>)?
 
     @ObservationIgnored
     private var listener: NWListener?
@@ -44,7 +43,7 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
 
     // MARK: - Helpers
 
-    func makeListener() throws -> NWListener {
+    private func makeListener() throws -> NWListener {
         let parameters = NWParameters.tcp
         parameters.includePeerToPeer = true  // Allow discovery on AWDL, etc.
 

@@ -14,8 +14,12 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
     // MARK: - Properties
 
     public private(set) var state: ServiceState = .inactive
-    public private(set) var availablePeers: [P] = []
 
+    public var availablePeers: [P] {
+        Array(discoveredPeers.values)
+    }
+
+    private var discoveredPeers: [ID: P] = [:]
     @ObservationIgnored
     private lazy var browser = makeBrowser()
 
@@ -28,7 +32,7 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
     public func stopDiscoveringPeers() {
         browser.stopBrowsingForPeers()
-        availablePeers = []
+        discoveredPeers.removeAll()
         state = .inactive
     }
 
@@ -48,18 +52,18 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
 
 }
 
+// MARK: - MCNearbyServiceBrowserDelegate
+
 extension MultipeerDiscoveryService: MCNearbyServiceBrowserDelegate {
 
     public func browser(_ browser: MCNearbyServiceBrowser, foundPeer peerID: MCPeerID, withDiscoveryInfo info: [String: String]?) {
-        logger.info("Browser found peer: \(peerID.displayName)")
-        availablePeers.append(MultipeerPeer(identifier: peerID, info: info))
+        logger.info("Browser found peer \(peerID.displayName)")
+        discoveredPeers[peerID.displayName] = MultipeerPeer(identifier: peerID, info: info)
     }
 
     public func browser(_ browser: MCNearbyServiceBrowser, lostPeer peerID: MCPeerID) {
-        logger.info("Browser lost peer: \(peerID.displayName)")
-        availablePeers.removeAll { peer in
-            peer.identifier == peerID
-        }
+        logger.info("Browser lost peer \(peerID.displayName)")
+        discoveredPeers[peerID.displayName] = nil
     }
 
     public func browser(_ browser: MCNearbyServiceBrowser, didNotStartBrowsingForPeers error: any Error) {
