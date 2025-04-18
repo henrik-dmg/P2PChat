@@ -9,8 +9,6 @@ import Observation
 
 public protocol PeerAdvertisingService<P>: PeerDataTransferService {
 
-    associatedtype Callback = (Result<[P.ID], any Error>) -> Void
-
     var state: ServiceState { get }
 
     var advertisingDelegate: (any PeerAdvertisingServiceDelegate<Self.S>)? { get set }

@@ -36,10 +36,12 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
     private var connectedPheripherals: [ID: CBPeripheral] = [:]
     @ObservationIgnored
     private var writeCharacteristics: [ID: CBCharacteristic] = [:]
-    @ObservationIgnored
-    private var receivedData: [ID: Data] = [:]
     private let centralManager: CBCentralManager
     private let centralsQueue: DispatchQueue
+
+    private let chunkReceiver = BluetoothChunkReceiver()
+    private let chunkSender = BluetoothChunkSender()
+
     private let logger = Logger.bluetooth
 
     // MARK: - Init
@@ -97,7 +99,7 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
         let peerID = peerID(for: peripheral)
         connectedPheripherals[peerID] = nil
         writeCharacteristics[peerID] = nil
-        receivedData[peerID] = nil
+        chunkReceiver.wipeReceivedData(from: peerID)
         delegate?.serviceDidDisconnectFromPeer(with: peerID)
     }
 
@@ -128,13 +130,8 @@ extension BluetoothDiscoveryService: PeerDataTransferService {
             return
         }
 
-        // Split data into chunks if it's too large (BLE has a 20-byte limit per packet)
-        let chunkSize = 20
-        let chunks = stride(from: 0, to: data.count, by: chunkSize).map {
-            data[$0..<min($0 + chunkSize, data.count)]
-        }
-
-        for chunk in chunks {
+        chunkSender.send(data, to: peerID) { [weak self] chunk in
+            self?.logger.debug("Writing \(chunk.count) bytes")
             peripheral.writeValue(chunk, for: characteristic, type: .withResponse)
         }
     }
@@ -253,11 +250,7 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
         }
     }
 
-    public func peripheral(
-        _ peripheral: CBPeripheral,
-        didDiscoverCharacteristicsFor service: CBService,
-        error: Error?
-    ) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         if let error {
             logger.error("Error discovering characteristic: \(error.localizedDescription)")
             return
@@ -283,51 +276,34 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
         }
     }
 
-    public func peripheral(
-        _ peripheral: CBPeripheral,
-        didUpdateValueFor characteristic: CBCharacteristic,
-        error: Error?
-    ) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        // First handle error if any
         if let error {
-            logger.error("Error updating value for characteristic: \(error.localizedDescription)")
-            return
-        }
-
-        guard let characteristicData = characteristic.value, let stringFromData = String(data: characteristicData, encoding: .utf8) else {
+            logger.error("Error updating value for characteristic \(characteristic.uuid): \(error.localizedDescription)")
             return
         }
 
         let peerID = peerID(for: peripheral)
-        logger.debug("Received \(characteristicData.count)")
 
-        //        // Have we received the end-of-message token?
-        //        if stringFromData == "EOM" {
-        //            // End-of-message case: show the data.
-        //            // Dispatch the text view update to the main queue for updating the UI, because
-        //            // we don't know which thread this method will be called back on.
-        //            if let receivedData = receivedData[peerID] {
-        //                self.receivedData[peerID] = nil
-        //                delegate?.serviceReceived(data: receivedData, from: peerID)
-        //            }
-        //        } else {
-        //            // Otherwise, just append the data to what we have previously received.
-        //            if receivedData[peerID] != nil {
-        //                receivedData[peerID]?.append(characteristicData)
-        //            } else {
-        //                receivedData[peerID] = characteristicData
-        //            }
-        //        }
+        guard let characteristicData = characteristic.value else {
+            logger.warning("Characterisic \(characteristic.uuid) value was updated but is nil")
+            return
+        }
+
+        logger.debug("Received \(characteristicData.count) bytes from \(peerID) for characteristic \(characteristic.uuid)")
+
+        if chunkReceiver.receive(characteristicData, from: peerID), let completeData = chunkReceiver.allReceivedData(from: peerID) {
+            logger.info("Notifying delegate about \(completeData.count) received bytes")
+            delegate?.serviceReceived(data: completeData, from: peerID)
+        }
     }
 
-    public func peripheral(
-        _ peripheral: CBPeripheral,
-        didWriteValueFor characteristic: CBCharacteristic,
-        error: Error?
-    ) {
+    public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        // TODO: Notify chunkSender of chunk send
         if let error {
-            logger.error("Error writing value for characteristic: \(error)")
+            logger.error("Error writing value for characteristic \(characteristic.uuid): \(error)")
         } else {
-            logger.info("Successfully wrote value for characteristic")
+            logger.info("Successfully wrote value for characteristic \(characteristic.uuid)")
         }
     }
 

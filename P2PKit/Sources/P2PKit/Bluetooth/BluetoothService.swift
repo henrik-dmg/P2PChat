@@ -9,9 +9,13 @@ import CoreBluetooth
 
 public struct BluetoothService: Service {
 
+    // MARK: - Properties
+
     public let uuid: CBUUID
     public let writeCharacteristicUUID: CBUUID
     public let readCharacteristicUUID: CBUUID
+
+    // MARK: - Init
 
     public init(uuid: CBUUID, writeCharacteristicUUID: CBUUID, readCharacteristicUUID: CBUUID) {
         self.uuid = uuid

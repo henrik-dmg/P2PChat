@@ -34,6 +34,10 @@ public final class BluetoothAdvertisingService: NSObject, PeerAdvertisingService
     private var centrals: [ID: CBCentral] = [:]
     private let peripheralManager: CBPeripheralManager
     private let peripheralQueue: DispatchQueue
+
+    private let chunkReceiver = BluetoothChunkReceiver()
+    private let chunkSender = BluetoothChunkSender()
+
     private let logger = Logger.bluetooth
 
     @ObservationIgnored
@@ -65,11 +69,7 @@ public final class BluetoothAdvertisingService: NSObject, PeerAdvertisingService
         self.ownPeerID = ownPeerID
         self.service = service
         self.peripheralQueue = DispatchQueue(label: "peripheralQueue")
-        self.peripheralManager = CBPeripheralManager(
-            delegate: nil,
-            queue: peripheralQueue,
-            options: nil
-        )
+        self.peripheralManager = CBPeripheralManager(delegate: nil, queue: peripheralQueue, options: nil)
         super.init()
         peripheralManager.delegate = self
     }
@@ -145,13 +145,11 @@ extension BluetoothAdvertisingService: PeerDataTransferService {
             return
         }
 
-        // Split data into chunks if it's too large (BLE has a 20-byte limit per packet)
-        let chunkSize = 20
-        let chunks = stride(from: 0, to: data.count, by: chunkSize).map {
-            data[$0..<min($0 + chunkSize, data.count)]
-        }
-
-        for chunk in chunks {
+        chunkSender.send(data, to: peerID) { [weak self] chunk in
+            guard let self else {
+                return
+            }
+            logger.debug("Writing \(chunk.count) bytes")
             peripheralManager.updateValue(
                 chunk,
                 for: readCharacteristic,
@@ -161,10 +159,11 @@ extension BluetoothAdvertisingService: PeerDataTransferService {
     }
 
     public func disconnect(from peerID: ID) {
-        guard let central = centrals[peerID] else {
-            logger.error("No central \(peerID) to disconnect from")
-            return
-        }
+        // TODO: Look into actually closing connection
+        // guard let central = centrals[peerID] else {
+        //     logger.error("No central \(peerID) to disconnect from")
+        //     return
+        // }
 
         // Remove the central from our tracking
         centrals[peerID] = nil
@@ -206,13 +205,17 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         }
     }
 
-    public func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
+    public func peripheralManager(
+        _ peripheraManagerl: CBPeripheralManager,
+        central: CBCentral,
+        didSubscribeTo characteristic: CBCharacteristic
+    ) {
         logger.info("Central subscribed to characteristic \(characteristic.uuid)")
         handlePeripheralConnected(central)
     }
 
     public func peripheralManager(
-        _ peripheral: CBPeripheralManager,
+        _ peripheralManager: CBPeripheralManager,
         central: CBCentral,
         didUnsubscribeFrom characteristic: CBCharacteristic
     ) {
@@ -220,25 +223,11 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         handlePeripheralDisconnected(central)
     }
 
-    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
-        logger.info("Peripheral manager received \(requests.count) write requests")
-        for request in requests {
-            guard let data = request.value else {
-                peripheral.respond(to: request, withResult: .invalidAttributeValueLength)
-                return
-            }
-
-            // Notify the delegate about received data
-            delegate?.serviceReceived(data: data, from: request.central.identifier.uuidString)
-            peripheral.respond(to: request, withResult: .success)
-        }
-    }
-
-    public func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: (any Error)?) {
+    public func peripheralManager(_ peripheralManager: CBPeripheralManager, didAdd service: CBService, error: (any Error)?) {
         logger.info("Peripheral manager added service \(service.uuid)")
     }
 
-    public func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: (any Error)?) {
+    public func peripheralManagerDidStartAdvertising(_ peripheralManager: CBPeripheralManager, error: (any Error)?) {
         if let error {
             updateState(.error(error))
             return
@@ -246,8 +235,30 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         updateState(.active)
     }
 
-    public func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
+    public func peripheralManagerIsReady(toUpdateSubscribers peripheralManager: CBPeripheralManager) {
         logger.info("Peripheral manager is ready")
+    }
+
+    public func peripheralManager(_ peripheralManager: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {
+        logger.info("Peripheral manager received \(requests.count) write requests")
+        for request in requests {
+            guard let data = request.value else {
+                peripheralManager.respond(to: request, withResult: .invalidAttributeValueLength)
+                return
+            }
+
+            peripheralManager.respond(to: request, withResult: .success)
+
+            let peerID = request.central.identifier.uuidString
+            if chunkReceiver.receive(data, from: peerID), let completeData = chunkReceiver.allReceivedData(from: peerID) {
+                logger.info("Notifying delegate about \(completeData.count) received bytes")
+                delegate?.serviceReceived(data: completeData, from: peerID)
+            }
+        }
+    }
+
+    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+        logger.info("Peripheral manager received read request")
     }
 
 }
