@@ -32,7 +32,7 @@ public class BonjourDataTransferService: NSObject, PeerDataTransferService {
     @ObservationIgnored
     private let connectionsQueue = DispatchQueue(label: "connectionsQueue")
 
-    let logger = Logger.bonjour
+    private let logger = Logger.bonjour("datatransfer")
 
     // MARK: - Init
 

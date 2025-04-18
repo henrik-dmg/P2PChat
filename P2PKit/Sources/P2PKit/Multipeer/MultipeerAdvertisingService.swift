@@ -7,6 +7,7 @@
 
 import MultipeerConnectivity
 import Observation
+import OSLog
 
 @Observable
 public final class MultipeerAdvertisingService: MultipeerDataTransferService, PeerAdvertisingService {
@@ -18,6 +19,8 @@ public final class MultipeerAdvertisingService: MultipeerDataTransferService, Pe
 
     @ObservationIgnored
     private lazy var advertiser = makeAdvertiser()
+
+    private let logger = Logger.multipeer("advertising")
 
     // MARK: - PeerDiscoveryService
 

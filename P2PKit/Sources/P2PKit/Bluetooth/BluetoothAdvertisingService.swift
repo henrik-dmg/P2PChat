@@ -38,28 +38,18 @@ public final class BluetoothAdvertisingService: NSObject, PeerAdvertisingService
     private let chunkReceiver = BluetoothChunkReceiver()
     private let chunkSender = BluetoothChunkSender()
 
-    private let logger = Logger.bluetooth
+    private let logger = Logger.bluetooth("advertising")
 
     @ObservationIgnored
     private lazy var cbService: CBMutableService = makeService()
 
     @ObservationIgnored
-    private lazy var readCharacteristic: CBMutableCharacteristic = {
+    private lazy var characteristic: CBMutableCharacteristic = {
         CBMutableCharacteristic(
-            type: service.readCharacteristicUUID,
-            properties: [.read, .notify],
+            type: service.characteristicUUID,
+            properties: [.read, .notify, .write, .writeWithoutResponse],
             value: nil,
-            permissions: [.readable]
-        )
-    }()
-
-    @ObservationIgnored
-    private lazy var writeCharacteristic: CBMutableCharacteristic = {
-        CBMutableCharacteristic(
-            type: service.writeCharacteristicUUID,
-            properties: [.write, .writeWithoutResponse],
-            value: nil,
-            permissions: [.writeable]
+            permissions: [.readable, .writeable]
         )
     }()
 
@@ -95,7 +85,7 @@ public final class BluetoothAdvertisingService: NSObject, PeerAdvertisingService
 
     private func makeService() -> CBMutableService {
         let transferService = CBMutableService(type: service.uuid, primary: true)
-        transferService.characteristics = [readCharacteristic, writeCharacteristic]
+        transferService.characteristics = [characteristic]
         return transferService
     }
 
@@ -151,7 +141,7 @@ extension BluetoothAdvertisingService: PeerDataTransferService {
             }
             let wasValueUpdated = peripheralManager.updateValue(
                 chunk,
-                for: readCharacteristic,
+                for: characteristic,
                 onSubscribedCentrals: [central]
             )
             if wasValueUpdated {
@@ -249,10 +239,12 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         logger.info("Peripheral manager received \(requests.count) write requests")
         for request in requests {
             guard let data = request.value else {
+                logger.warning("Responding to write request with invalid attribute value length")
                 peripheralManager.respond(to: request, withResult: .invalidAttributeValueLength)
                 return
             }
 
+            logger.debug("Responding to write request with success")
             peripheralManager.respond(to: request, withResult: .success)
 
             let peerID = request.central.identifier.uuidString
@@ -263,8 +255,9 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
         }
     }
 
-    public func peripheralManager(_ peripheral: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
+    public func peripheralManager(_ peripheralManager: CBPeripheralManager, didReceiveRead request: CBATTRequest) {
         logger.info("Peripheral manager received read request")
+        peripheralManager.respond(to: request, withResult: .requestNotSupported)
     }
 
 }

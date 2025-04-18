@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import OSLog
 
 final class BluetoothChunkSender {
 
@@ -18,6 +19,7 @@ final class BluetoothChunkSender {
     private var pendingChunks: [String: [Data]] = [:]
     private var writeHandlers: [String: ChunkWriteHandler] = [:]
     private let chunkSize: Int
+    private let logger = Logger.bluetooth("chunksender")
 
     // MARK: - Init
 
@@ -49,6 +51,7 @@ final class BluetoothChunkSender {
 
     func sendNextChunk() {
         guard var (peerID, pendingChunks) = pendingChunks.first else {
+            logger.info("No pending chunks to send")
             // No data cached that is still waiting to be sent
             return
         }
@@ -56,9 +59,11 @@ final class BluetoothChunkSender {
         if pendingChunks.isEmpty {
             self.pendingChunks[peerID] = nil
             self.writeHandlers[peerID] = nil
+            return
         }
 
         guard let writeHandler = writeHandlers[peerID] else {
+            logger.warning("No write handler for \(peerID)")
             return
         }
 

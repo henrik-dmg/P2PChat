@@ -34,7 +34,7 @@ public class MultipeerDataTransferService: NSObject, PeerDataTransferService {
     @ObservationIgnored
     lazy var ownMCPeerID = MCPeerID(displayName: ownPeerID)
 
-    let logger = Logger.multipeer
+    private let logger = Logger.multipeer("datatransfer")
 
     // MARK: - Init
 

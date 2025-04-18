@@ -13,8 +13,14 @@ extension Logger {
         "dev.panhans.P2PKit"
     }
 
-    static let multipeer = Logger(subsystem: subsystem, category: "multipeer")
-    static let bluetooth = Logger(subsystem: subsystem, category: "bluetooth")
-    static let bonjour = Logger(subsystem: subsystem, category: "bonjour")
+    static func multipeer(_ subCategory: String) -> Logger {
+        Logger(subsystem: subsystem, category: "multipeer-\(subCategory)")
+    }
+    static func bluetooth(_ subCategory: String) -> Logger {
+        Logger(subsystem: subsystem, category: "bluetooth-\(subCategory)")
+    }
+    static func bonjour(_ subCategory: String) -> Logger {
+        Logger(subsystem: subsystem, category: "bonjour-\(subCategory)")
+    }
 
 }

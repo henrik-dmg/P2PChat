@@ -7,6 +7,7 @@
 
 import MultipeerConnectivity
 import Observation
+import OSLog
 
 @Observable
 public final class MultipeerDiscoveryService: MultipeerDataTransferService, PeerDiscoveryService {
@@ -22,6 +23,8 @@ public final class MultipeerDiscoveryService: MultipeerDataTransferService, Peer
     private var discoveredPeers: [ID: P] = [:]
     @ObservationIgnored
     private lazy var browser = makeBrowser()
+
+    private let logger = Logger.multipeer("discovery")
 
     // MARK: - PeerDiscoveryService
 

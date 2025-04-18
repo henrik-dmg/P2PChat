@@ -7,6 +7,7 @@
 
 import Network
 import Observation
+import OSLog
 
 @Observable
 public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAdvertisingService {
@@ -20,6 +21,8 @@ public final class BonjourAdvertisingService: BonjourDataTransferService, PeerAd
     private var listener: NWListener?
     @ObservationIgnored
     private let listenerQueue = DispatchQueue(label: "listenerQueue")
+
+    private let logger = Logger.bonjour("advertising")
 
     // MARK: - PeerDiscoveryService
 

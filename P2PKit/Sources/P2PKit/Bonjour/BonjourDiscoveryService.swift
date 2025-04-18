@@ -7,6 +7,7 @@
 
 import Network
 import SwiftUI
+import OSLog
 
 @Observable
 public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDiscoveryService {
@@ -24,6 +25,8 @@ public final class BonjourDiscoveryService: BonjourDataTransferService, PeerDisc
     private var browser: NWBrowser?
     @ObservationIgnored
     private let browserQueue = DispatchQueue(label: "browserQueue")
+
+    private let logger = Logger.bonjour("discovery")
 
     // MARK: - PeerDiscoveryService
 

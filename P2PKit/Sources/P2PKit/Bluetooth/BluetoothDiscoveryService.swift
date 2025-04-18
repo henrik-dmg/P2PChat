@@ -42,7 +42,7 @@ public class BluetoothDiscoveryService: NSObject, PeerDiscoveryService {
     private let chunkReceiver = BluetoothChunkReceiver()
     private let chunkSender = BluetoothChunkSender()
 
-    private let logger = Logger.bluetooth
+    private let logger = Logger.bluetooth("discovery")
 
     // MARK: - Init
 
@@ -130,9 +130,8 @@ extension BluetoothDiscoveryService: PeerDataTransferService {
             return
         }
 
-        chunkSender.queue(data, to: peerID) { [weak self] chunk in
-            self?.logger.debug("Writing \(chunk.count) bytes")
-            peripheral.writeValue(chunk, for: characteristic, type: .withoutResponse)
+        chunkSender.queue(data, to: peerID) { chunk in
+            peripheral.writeValue(chunk, for: characteristic, type: .withResponse)
         }
         chunkSender.sendNextChunk()
     }
@@ -246,7 +245,7 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
         }
 
         for service in services where service.uuid == self.service.uuid {
-            peripheral.discoverCharacteristics([self.service.readCharacteristicUUID, self.service.writeCharacteristicUUID], for: service)
+            peripheral.discoverCharacteristics([self.service.characteristicUUID], for: service)
             break
         }
     }
@@ -271,9 +270,7 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
                 }
             }
 
-            if properties.contains(.notify) || properties.contains(.read) {
-                peripheral.setNotifyValue(true, for: characteristic)
-            }
+            peripheral.setNotifyValue(true, for: characteristic)
         }
     }
 
@@ -307,6 +304,10 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
             logger.info("Successfully wrote value for characteristic \(characteristic.uuid)")
             chunkSender.sendNextChunk()
         }
+    }
+
+    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        logger.warning("Peripheral \(peripheral.safeName) did modify services")
     }
 
 }

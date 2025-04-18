@@ -12,15 +12,13 @@ public struct BluetoothService: Service {
     // MARK: - Properties
 
     public let uuid: CBUUID
-    public let writeCharacteristicUUID: CBUUID
-    public let readCharacteristicUUID: CBUUID
+    public let characteristicUUID: CBUUID
 
     // MARK: - Init
 
-    public init(uuid: CBUUID, writeCharacteristicUUID: CBUUID, readCharacteristicUUID: CBUUID) {
+    public init(uuid: CBUUID, characteristicUUID: CBUUID) {
         self.uuid = uuid
-        self.writeCharacteristicUUID = writeCharacteristicUUID
-        self.readCharacteristicUUID = readCharacteristicUUID
+        self.characteristicUUID = characteristicUUID
     }
 
 }
