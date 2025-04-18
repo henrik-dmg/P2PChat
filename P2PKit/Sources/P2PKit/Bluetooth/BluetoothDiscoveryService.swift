@@ -274,6 +274,10 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
         }
     }
 
+    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
+        logger.warning("Peripheral \(peripheral.safeName) did modify services")
+    }
+
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         // First handle error if any
         if let error {
@@ -297,17 +301,17 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
     }
 
     public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        // First handle error if any
         if let error {
             logger.error("Error writing value for characteristic \(characteristic.uuid): \(error)")
-            // No retry logic for sending the last chunk again
-        } else {
-            logger.info("Successfully wrote value for characteristic \(characteristic.uuid)")
             chunkSender.sendNextChunk()
+            return
         }
-    }
 
-    public func peripheral(_ peripheral: CBPeripheral, didModifyServices invalidatedServices: [CBService]) {
-        logger.warning("Peripheral \(peripheral.safeName) did modify services")
+        logger.info("Successfully wrote value for characteristic \(characteristic.uuid)")
+        let peerID = peerID(for: peripheral)
+        chunkSender.markChunkAsSent(for: peerID)
+        chunkSender.sendNextChunk()
     }
 
 }

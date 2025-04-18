@@ -139,15 +139,15 @@ extension BluetoothAdvertisingService: PeerDataTransferService {
             guard let self else {
                 return
             }
-            let wasValueUpdated = peripheralManager.updateValue(
-                chunk,
-                for: characteristic,
-                onSubscribedCentrals: [central]
-            )
+
+            let wasValueUpdated = peripheralManager.updateValue(chunk, for: characteristic, onSubscribedCentrals: [central])
+
             if wasValueUpdated {
                 logger.debug("Wrote \(chunk.count) bytes")
+                chunkSender.markChunkAsSent(for: peerID)
+                chunkSender.sendNextChunk()
             } else {
-                logger.error("Failed to write \(chunk.count) bytes")
+                logger.warning("Failed to write \(chunk.count) bytes. Most likely because queue is full.")
             }
         }
         chunkSender.sendNextChunk()

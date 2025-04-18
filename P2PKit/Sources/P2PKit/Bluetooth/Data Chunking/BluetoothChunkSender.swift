@@ -49,14 +49,18 @@ final class BluetoothChunkSender {
          writeHandlers[peerID] = chunkWriteHandler
     }
 
+    func markChunkAsSent(for peerID: String) {
+        pendingChunks[peerID]?.removeFirst()
+    }
+
     func sendNextChunk() {
-        guard var (peerID, pendingChunks) = pendingChunks.first else {
+        guard let (peerID, pendingChunks) = pendingChunks.first else {
             logger.info("No pending chunks to send")
             // No data cached that is still waiting to be sent
             return
         }
 
-        if pendingChunks.isEmpty {
+        guard let nextChunk = pendingChunks.first else {
             self.pendingChunks[peerID] = nil
             self.writeHandlers[peerID] = nil
             return
@@ -67,9 +71,7 @@ final class BluetoothChunkSender {
             return
         }
 
-        let chunkToSend = pendingChunks.removeFirst()
-        self.pendingChunks[peerID] = pendingChunks
-        writeHandler(chunkToSend)
+        writeHandler(nextChunk)
     }
 
 }
