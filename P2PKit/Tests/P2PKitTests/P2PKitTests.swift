@@ -1,5 +1,6 @@
-import Testing
+import CoreBluetooth
 import Foundation
+import Testing
 
 @testable import P2PKit
 
@@ -14,7 +15,8 @@ struct BonjourAdvertisingTests: AdvertisingTests {
 
     let service = BonjourService(type: "_p2pchat._tcp")
 
-    @Test func serviceGetsAdvertised() async throws {
+    @Test
+    func serviceGetsAdvertised() async throws {
         let advertiser = BonjourAdvertisingService(ownPeerID: UUID().uuidString, service: service)
 
         advertiser.startAdvertisingService()
@@ -33,7 +35,8 @@ struct MultipeerAdvertisingTests: AdvertisingTests {
 
     let service = MultipeerService(type: "p2pchat-test")
 
-    @Test func serviceGetsAdvertised() async throws {
+    @Test
+    func serviceGetsAdvertised() async throws {
         let advertiser = MultipeerAdvertisingService(ownPeerID: UUID().uuidString, service: service)
 
         advertiser.startAdvertisingService()
@@ -47,14 +50,13 @@ struct MultipeerAdvertisingTests: AdvertisingTests {
 
 }
 
-import CoreBluetooth
-
 @Suite("Bonjour Advertising Tests", .disabled())
 struct BluetoothAdvertisingTests: AdvertisingTests {
 
     let service = BluetoothService(type: CBUUID(), writeCharacteristicUUID: UUID().uuidString, readCharacteristicUUID: UUID().uuidString)
 
-    @Test func serviceGetsAdvertised() async throws {
+    @Test
+    func serviceGetsAdvertised() async throws {
         let advertiser = BluetoothAdvertisingService(ownPeerID: UUID().uuidString, service: service)
 
         advertiser.startAdvertisingService()

@@ -17,7 +17,7 @@ struct ChatView<ChatPeer: Peer>: View {
     private var isPresentingAlert = false
     @State
     private var errorDescription: String?
-    
+
     @State
     private var sendTask: Task<Void, Error>?
 

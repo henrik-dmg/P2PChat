@@ -5,8 +5,8 @@
 //  Created by Henrik Panhans on 17.04.25.
 //
 
-import SwiftUI
 import P2PKit
+import SwiftUI
 
 struct ChatsListView<ChatPeer: Peer>: View {
 

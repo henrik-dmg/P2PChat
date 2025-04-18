@@ -48,11 +48,11 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                 }
             }
             ForEach(service.availablePeers) { peer in
-#if os(iOS)
+                #if os(iOS)
                 swipeActionPeerCellView(peer)
-#else
+                #else
                 buttonActionPeerCellView(peer)
-#endif
+                #endif
             }
         }
         .navigationTitle("Discovery")
@@ -65,14 +65,17 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
             }
         }
         .onChange(of: service.connectedPeers) { oldValue, newValue in
+            guard oldValue != newValue else {
+                return
+            }
             if newValue.isEmpty {
                 if case .chat = sheetContent {
                     service.disconnectAll()
                     self.sheetContent = nil
                 }
             } else {
-                service.stopDiscoveringPeers()
                 self.sheetContent = .chat(newValue)
+                service.stopDiscoveringPeers()
             }
         }
     }
