@@ -1,0 +1,3 @@
+[submodule "P2PKit"]
+	path = P2PKit
+	url = git@github.com:henrik-dmg/P2PKit.git
