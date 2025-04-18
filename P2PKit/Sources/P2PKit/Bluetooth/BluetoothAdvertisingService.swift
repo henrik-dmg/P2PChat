@@ -145,17 +145,22 @@ extension BluetoothAdvertisingService: PeerDataTransferService {
             return
         }
 
-        chunkSender.send(data, to: peerID) { [weak self] chunk in
+        chunkSender.queue(data, to: peerID) { [weak self] chunk in
             guard let self else {
                 return
             }
-            logger.debug("Writing \(chunk.count) bytes")
-            peripheralManager.updateValue(
+            let wasValueUpdated = peripheralManager.updateValue(
                 chunk,
                 for: readCharacteristic,
                 onSubscribedCentrals: [central]
             )
+            if wasValueUpdated {
+                logger.debug("Wrote \(chunk.count) bytes")
+            } else {
+                logger.error("Failed to write \(chunk.count) bytes")
+            }
         }
+        chunkSender.sendNextChunk()
     }
 
     public func disconnect(from peerID: ID) {
@@ -237,6 +242,7 @@ extension BluetoothAdvertisingService: CBPeripheralManagerDelegate {
 
     public func peripheralManagerIsReady(toUpdateSubscribers peripheralManager: CBPeripheralManager) {
         logger.info("Peripheral manager is ready")
+        chunkSender.sendNextChunk()
     }
 
     public func peripheralManager(_ peripheralManager: CBPeripheralManager, didReceiveWrite requests: [CBATTRequest]) {

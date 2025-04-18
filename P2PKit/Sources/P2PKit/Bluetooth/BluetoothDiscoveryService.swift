@@ -130,10 +130,11 @@ extension BluetoothDiscoveryService: PeerDataTransferService {
             return
         }
 
-        chunkSender.send(data, to: peerID) { [weak self] chunk in
+        chunkSender.queue(data, to: peerID) { [weak self] chunk in
             self?.logger.debug("Writing \(chunk.count) bytes")
-            peripheral.writeValue(chunk, for: characteristic, type: .withResponse)
+            peripheral.writeValue(chunk, for: characteristic, type: .withoutResponse)
         }
+        chunkSender.sendNextChunk()
     }
 
     public func disconnect(from peerID: ID) {
@@ -299,11 +300,12 @@ extension BluetoothDiscoveryService: CBPeripheralDelegate {
     }
 
     public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        // TODO: Notify chunkSender of chunk send
         if let error {
             logger.error("Error writing value for characteristic \(characteristic.uuid): \(error)")
+            // No retry logic for sending the last chunk again
         } else {
             logger.info("Successfully wrote value for characteristic \(characteristic.uuid)")
+            chunkSender.sendNextChunk()
         }
     }
 

@@ -27,7 +27,7 @@ final class BluetoothChunkSender {
 
     // MARK: - Methods
 
-    func send(_ data: Data, to peerID: String, chunkWriteHandler: @escaping (Data) -> Void) {
+    func queue(_ data: Data, to peerID: String, chunkWriteHandler: @escaping (Data) -> Void) {
         var chunks = stride(from: data.startIndex, to: data.endIndex, by: chunkSize).map { index in
             let fullChunkEndIndex = index.advanced(by: chunkSize)
             if data.endIndex < fullChunkEndIndex {
@@ -38,19 +38,33 @@ final class BluetoothChunkSender {
         }
         chunks.append(.bluetoothEOM)
 
-        for chunk in chunks {
-            chunkWriteHandler(chunk)
+         if pendingChunks[peerID] != nil {
+             pendingChunks[peerID]?.append(contentsOf: chunks)
+         } else {
+             pendingChunks[peerID] = chunks
+         }
+
+         writeHandlers[peerID] = chunkWriteHandler
+    }
+
+    func sendNextChunk() {
+        guard var (peerID, pendingChunks) = pendingChunks.first else {
+            // No data cached that is still waiting to be sent
+            return
         }
 
-        // TODO: Store chunkWriteHandler and only move onto next chunk when value was actually written
+        if pendingChunks.isEmpty {
+            self.pendingChunks[peerID] = nil
+            self.writeHandlers[peerID] = nil
+        }
 
-        // if pendingChunks[peerID] != nil {
-        //     pendingChunks[peerID]?.append(contentsOf: chunks)
-        // } else {
-        //     pendingChunks[peerID] = chunks
-        // }
+        guard let writeHandler = writeHandlers[peerID] else {
+            return
+        }
 
-        // writeHandlers[peerID] = chunkWriteHandler
+        let chunkToSend = pendingChunks.removeFirst()
+        self.pendingChunks[peerID] = pendingChunks
+        writeHandler(chunkToSend)
     }
 
 }
