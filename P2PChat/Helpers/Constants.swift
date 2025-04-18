@@ -16,7 +16,8 @@ extension Service {
     static var bluetooth: BluetoothService {
         BluetoothService(
             uuid: CBUUID(string: "5879ACD3-E7F0-495D-940F-03E702379A1C"),
-            characteristicUUID: CBUUID(string: "5879ACD3-E7F0-495D-940F-03E702379A1D"),
+            writeCharacteristicUUID: CBUUID(string: "5879ACD3-E7F0-495D-940F-03E702379A1D"),
+            readCharacteristicUUID: CBUUID(string: "5879ACD3-E7F0-495D-940F-03E702379A1E")
         )
     }
 
