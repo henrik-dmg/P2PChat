@@ -6,16 +6,39 @@
 //
 
 import Foundation
+import OSLog
 import Observation
 import P2PKit
+import PhotosUI
+import SwiftUI
+
+enum ImageState {
+    case empty
+    case loading(Progress)
+    case success(ChatMessageImage)
+    case failure(any Error)
+}
 
 @Observable
 final class ChatMessageHandler<ChatPeer: Peer> {
 
-    var chatMessages: [ChatMessage] = []
-    var currentMessage = ""
     private(set) var isConnected: Bool
+    private(set) var chatMessages: [ChatMessage] = []
+    private(set) var imageState: ImageState = .empty
 
+    var currentMessage = ""
+    var imageSelection: PhotosPickerItem? = nil {
+        didSet {
+            if let imageSelection {
+                let progress = loadTransferable(from: imageSelection)
+                imageState = .loading(progress)
+            } else {
+                imageState = .empty
+            }
+        }
+    }
+
+    var peerGivenName: String?
     let peerID: String
     var ownPeerID: String {
         transferService.ownPeerID
@@ -36,18 +59,63 @@ final class ChatMessageHandler<ChatPeer: Peer> {
     }
 
     func sendMessage() async throws {
-        guard !currentMessage.isEmpty else {
-            return
+        if !currentMessage.isEmpty {
+            try await sendContent(.text(currentMessage))
         }
-        let chatMessage = ChatMessage(date: .now, content: currentMessage, sender: transferService.ownPeerID, recipient: peerID)
-        let chatData = try encoder.encode(chatMessage)
-        try await transferService.send(chatData, to: peerID)
-        currentMessage = ""
-        chatMessages.append(chatMessage)
+    }
+
+    func onAppear() async throws {
+        try await sendContent(.nameAnnouncement(ownPeerID))
     }
 
     func onDisappear() {
         transferService.disconnect(from: peerID)
+    }
+
+    private func sendContent(_ content: ChatMessageContent) async throws {
+        let chatMessage = ChatMessage(date: .now, sender: transferService.ownPeerID, recipient: peerID, content: content)
+        let chatData = try encoder.encode(chatMessage)
+        try await transferService.send(chatData, to: peerID)
+        currentMessage = ""
+        imageState = .empty
+
+        switch content {
+        case .nameAnnouncement:
+            break
+        default:
+            chatMessages.append(chatMessage)
+        }
+    }
+
+    private func loadTransferable(from imageSelection: PhotosPickerItem) -> Progress {
+        imageSelection.loadTransferable(type: ChatMessageImage.self) { result in
+            DispatchQueue.main.async {
+                guard imageSelection == self.imageSelection else {
+                    print("Failed to get the selected item.")
+                    return
+                }
+                switch result {
+                case .success(let chatMessageImage?):
+                    self.imageState = .success(chatMessageImage)
+                case .success(nil):
+                    self.imageState = .empty
+                case .failure(let error):
+                    self.imageState = .failure(error)
+                }
+            }
+        }
+    }
+
+    private func handleMessageReceived(_ message: ChatMessage) {
+        Logger.chat.debug("Handling incoming message \(message.id)")
+        switch message.content {
+        case let .nameAnnouncement(name):
+            if !name.isEmpty {
+                peerGivenName = name
+            }
+        default:
+            chatMessages.append(message)
+        }
     }
 
 }
@@ -61,7 +129,7 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
     func serviceReceived(data: Data, from peer: String) {
         do {
             let message = try decoder.decode(ChatMessage.self, from: data)
-            chatMessages.append(message)
+            handleMessageReceived(message)
         } catch {
             print("Error decoding message:" + error.localizedDescription)
             print(String(data: data, encoding: .utf8) ?? "No UTF-8 decoding")

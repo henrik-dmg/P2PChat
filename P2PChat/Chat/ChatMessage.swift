@@ -8,20 +8,26 @@
 import Foundation
 import P2PKit
 
+enum ChatMessageContent: Codable {
+    case text(String)
+    case image(ChatMessageImage)
+    case nameAnnouncement(String)
+}
+
 struct ChatMessage: Identifiable, Codable {
 
     let id: UUID
     let date: Date
-    let content: String
     let sender: String
     let recipient: String
+    let content: ChatMessageContent
 
-    init(date: Date, content: String, sender: String, recipient: String) {
+    init(date: Date, sender: String, recipient: String, content: ChatMessageContent) {
         self.id = UUID()
         self.date = date
-        self.content = content
         self.sender = sender
         self.recipient = recipient
+        self.content = content
     }
 
 }

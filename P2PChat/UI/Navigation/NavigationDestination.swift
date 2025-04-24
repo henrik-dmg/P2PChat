@@ -32,7 +32,7 @@ enum NavigationDestination: Hashable {
                 Text("Advertising via Bluetooth is not supported on visionOS.")
                 #else
                 PeerAdvertisingView(
-                    service: BluetoothAdvertisingService(ownPeerID: ownPeerID, service: .bluetooth),
+                    service: BluetoothAdvertisingService(ownPeerID: ownPeerID, service: .bluetooth, endOfMessageSignal: .bluetoothEOM),
                     informationService: BluetoothInformationService()
                 )
                 #endif
@@ -51,7 +51,7 @@ enum NavigationDestination: Hashable {
             switch serviceType {
             case .bluetooth:
                 PeerDiscoveryView(
-                    service: BluetoothDiscoveryService(ownPeerID: ownPeerID, service: .bluetooth),
+                    service: BluetoothDiscoveryService(ownPeerID: ownPeerID, service: .bluetooth, endOfMessageSingal: .bluetoothEOM),
                     informationService: BluetoothInformationService()
                 )
             case .bonjour:
