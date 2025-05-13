@@ -22,6 +22,8 @@ enum ImageState {
 @Observable
 final class ChatMessageHandler<ChatPeer: Peer> {
 
+    // MARK: - Properties
+
     private(set) var isConnected: Bool
     private(set) var chatMessages: [ChatMessage] = []
     private(set) var imageState: ImageState = .empty
@@ -51,6 +53,8 @@ final class ChatMessageHandler<ChatPeer: Peer> {
     @ObservationIgnored
     let decoder = JSONDecoder()
 
+    // MARK: - Init
+
     init(peerID: String, transferService: any PeerDataTransferService<ChatPeer>) {
         self.peerID = peerID
         self.transferService = transferService
@@ -58,19 +62,30 @@ final class ChatMessageHandler<ChatPeer: Peer> {
         transferService.delegate = self
     }
 
+    // MARK: - Methods
+
     func sendMessage() async throws {
+        if case .success(let chatMessageImage) = imageState {
+            try await sendContent(.image(chatMessageImage))
+        }
         if !currentMessage.isEmpty {
             try await sendContent(.text(currentMessage))
         }
     }
 
-    func onAppear() async throws {
+    func announceNameToPeer() async throws {
         try await sendContent(.nameAnnouncement(ownPeerID))
     }
 
     func onDisappear() {
         transferService.disconnect(from: peerID)
     }
+
+    func removeImage() {
+        imageState = .empty
+    }
+
+    // MARK: - Helpers
 
     private func sendContent(_ content: ChatMessageContent) async throws {
         let chatMessage = ChatMessage(date: .now, sender: transferService.ownPeerID, recipient: peerID, content: content)
@@ -89,18 +104,19 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 
     private func loadTransferable(from imageSelection: PhotosPickerItem) -> Progress {
         imageSelection.loadTransferable(type: ChatMessageImage.self) { result in
-            DispatchQueue.main.async {
-                guard imageSelection == self.imageSelection else {
+            DispatchQueue.main.async { [weak self] in
+                guard imageSelection == self?.imageSelection else {
                     print("Failed to get the selected item.")
                     return
                 }
+                self?.imageSelection = nil
                 switch result {
                 case .success(let chatMessageImage?):
-                    self.imageState = .success(chatMessageImage)
+                    self?.imageState = .success(chatMessageImage)
                 case .success(nil):
-                    self.imageState = .empty
+                    self?.imageState = .empty
                 case .failure(let error):
-                    self.imageState = .failure(error)
+                    self?.imageState = .failure(error)
                 }
             }
         }

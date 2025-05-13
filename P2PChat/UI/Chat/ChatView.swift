@@ -12,12 +12,8 @@ import SwiftUI
 
 struct ChatView<ChatPeer: Peer>: View {
 
-    @State
-    private var chatMessageHandler: ChatMessageHandler<ChatPeer>
-
-    init(service: any PeerDataTransferService<ChatPeer>, peerID: String) {
-        self.chatMessageHandler = ChatMessageHandler(peerID: peerID, transferService: service)
-    }
+    @Bindable
+    var chatMessageHandler: ChatMessageHandler<ChatPeer>
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -44,30 +40,10 @@ struct ChatView<ChatPeer: Peer>: View {
                 .defaultScrollAnchor(.bottom)
                 .listStyle(.plain)
             }
-            ChatMessageComposerView(chatMessageHandler: $chatMessageHandler)
+            ChatMessageComposerView(chatMessageHandler: chatMessageHandler)
         }
         .navigationTitle(chatMessageHandler.peerGivenName ?? chatMessageHandler.peerID)
-        .frame(minHeight: 200)
-        .task {
-            do {
-                try await chatMessageHandler.onAppear()
-            } catch {
-                Logger.chat.error("Failed to setup chat: \(error)")
-            }
-        }
-    }
-
-}
-
-struct ChatViewPreview: View {
-
-    var body: some View {
-        NavigationStack {
-            ChatView(
-                service: BonjourDiscoveryService(ownPeerID: "me", service: .bonjour),
-                peerID: "test"
-            )
-        }
+        .frame(minHeight: 400)
     }
 
 }

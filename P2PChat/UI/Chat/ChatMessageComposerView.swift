@@ -12,8 +12,9 @@ import SwiftUI
 
 struct ChatMessageComposerView<ChatPeer: Peer>: View {
 
-    @Binding
+    @Bindable
     var chatMessageHandler: ChatMessageHandler<ChatPeer>
+
     @State
     private var isPresentingAlert = false
     @State
@@ -24,16 +25,7 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if case .success(let chatMessageImage) = chatMessageHandler.imageState {
-                chatMessageImage.image { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(maxWidth: 100)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay {
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(.gray.opacity(0.3), lineWidth: 1)
-                        }
-                }
+                imageThumbnail(chatMessageImage)
             }
             HStack(spacing: 12) {
                 TextField("Message", text: $chatMessageHandler.currentMessage)
@@ -43,7 +35,7 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
                     .textFieldStyle(.roundedBorder)
                 imagePicker()
                 sendButton(title: "Send")
-                    .disabled(chatMessageHandler.currentMessage.isEmpty)
+                    .disabled(!isSendButtonEnabled)
             }
         }
         .padding()
@@ -64,7 +56,7 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
             Label("Image", systemImage: "photo")
                 .symbolVariant(.fill)
                 .labelStyle(.iconOnly)
-        }.buttonStyle(.borderless)
+        }
     }
 
     private func sendButton(title: LocalizedStringKey) -> some View {
@@ -85,6 +77,44 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
         sendTask = Task {
             _ = try await currentTask?.value
             _ = try await task.value
+        }
+    }
+
+    private var isSendButtonEnabled: Bool {
+        let hasMessage = !chatMessageHandler.currentMessage.isEmpty
+        let hasImage =
+            switch chatMessageHandler.imageState {
+            case .success:
+                true
+            default:
+                false
+            }
+
+        return hasMessage || hasImage
+    }
+
+    private func imageThumbnail(_ chatMessageImage: ChatMessageImage) -> some View {
+        chatMessageImage.image { image in
+            ZStack(alignment: .topLeading) {
+                image.resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 100)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(.gray.opacity(0.3), lineWidth: 1)
+                    }
+                    .draggable(chatMessageImage) {
+                        image
+                    }
+                Button("Remove image", systemImage: "xmark.circle") {
+                    chatMessageHandler.removeImage()
+                }
+                .symbolVariant(.fill)
+                .symbolRenderingMode(.palette)
+                .foregroundStyle(.white, .gray)
+                .labelStyle(.iconOnly)
+            }
         }
     }
 

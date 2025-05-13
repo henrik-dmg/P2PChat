@@ -24,7 +24,9 @@ struct ChatMessageImage: Transferable, Codable {
     let data: Data
 
     static var transferRepresentation: some TransferRepresentation {
-        DataRepresentation(importedContentType: .image) { data in
+        DataRepresentation(contentType: .image) { image in
+            image.data
+        } importing: { data in
             ChatMessageImage(data: data)
         }
     }

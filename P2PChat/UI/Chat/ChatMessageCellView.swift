@@ -32,6 +32,7 @@ struct ChatMessageCellView: View {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .fill(bubbleColor)
                 }
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             Text(isOwnMessage ? ownPeerID : peerGivenName ?? message.sender)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -53,6 +54,9 @@ struct ChatMessageCellView: View {
                 image.resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: 100)
+                    .draggable(chatMessageImage) {
+                        image
+                    }
             }
         }
     }

@@ -17,9 +17,7 @@ struct ChatsListView<ChatPeer: Peer>: View {
         NavigationStack {
             List {
                 ForEach(peerIDs, id: \.self) { peerID in
-                    NavigationLink(peerID) {
-                        ChatView(service: service, peerID: peerID)
-                    }
+                    ChatNavigationLink(service: service, peerID: peerID)
                 }
             }
             .navigationTitle("^[\(peerIDs.count) Chat](inflect: true)")
