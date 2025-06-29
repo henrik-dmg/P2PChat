@@ -75,7 +75,6 @@ final class PerformanceLogger {
 
         let numberOfEvents = eventsForPeer.count
 
-
         for i in 0..<numberOfEvents {
             let event = eventsForPeer[numberOfEvents - i - 1]
             print(event)
