@@ -14,6 +14,7 @@
 		26482DDD2D92D6F30059019C /* P2PKit in Frameworks */ = {isa = PBXBuildFile; productRef = 26482DDC2D92D6F30059019C /* P2PKit */; };
 		26482DDF2D92DED60059019C /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26482DDE2D92DED60059019C /* AsyncButton.swift */; };
 		264D71FE2DB1969700E5E771 /* ChatsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264D71FD2DB1969700E5E771 /* ChatsListView.swift */; };
+		265607842DF5E30100D43036 /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265607832DF5E2FD00D43036 /* PerformanceLogger.swift */; };
 		266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */; };
 		266192672D7B2B8C00CFC6D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */; };
 		266192682D7B2B8C00CFC6D7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 266192602D7B2B8C00CFC6D7 /* Assets.xcassets */; };
@@ -42,6 +43,7 @@
 		26482DDA2D92D6990059019C /* P2PKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = P2PKit; sourceTree = "<group>"; };
 		26482DDE2D92DED60059019C /* AsyncButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncButton.swift; sourceTree = "<group>"; };
 		264D71FD2DB1969700E5E771 /* ChatsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatsListView.swift; sourceTree = "<group>"; };
+		265607832DF5E2FD00D43036 /* PerformanceLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformanceLogger.swift; sourceTree = "<group>"; };
 		2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		266192602D7B2B8C00CFC6D7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		266192622D7B2B8C00CFC6D7 /* P2PChat.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PChat.entitlements; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 		26F3560F2D9567F100496DAF /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				265607832DF5E2FD00D43036 /* PerformanceLogger.swift */,
 				260F45B32DB98F4A00927AE9 /* Logging.swift */,
 				260F45B12DB98AC400927AE9 /* Data+Extensions.swift */,
 				26F3560D2D95675600496DAF /* Constants.swift */,
@@ -273,6 +276,7 @@
 				266192782D7B429100CFC6D7 /* ChatView.swift in Sources */,
 				26C6BB382DB2E8B0000E5377 /* ChatMessageImage.swift in Sources */,
 				26F3560E2D95675600496DAF /* Constants.swift in Sources */,
+				265607842DF5E30100D43036 /* PerformanceLogger.swift in Sources */,
 				260F45B22DB98AC400927AE9 /* Data+Extensions.swift in Sources */,
 				266192742D7B40A100CFC6D7 /* ChatMessageHandler.swift in Sources */,
 				26CFD19B2D8F028F00C37775 /* NavigationRouter.swift in Sources */,

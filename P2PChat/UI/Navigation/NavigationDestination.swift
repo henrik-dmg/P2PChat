@@ -32,13 +32,21 @@ enum NavigationDestination: Hashable {
                 Text("Advertising via Bluetooth is not supported on visionOS.")
                 #else
                 PeerAdvertisingView(
-                    service: BluetoothAdvertisingService(ownPeerID: ownPeerID, service: .bluetooth, endOfMessageSignal: .defaultEndOfMessageSignal),
+                    service: BluetoothAdvertisingService(
+                        ownPeerID: ownPeerID,
+                        service: .bluetooth,
+                        endOfMessageSignal: .defaultEndOfMessageSignal
+                    ),
                     informationService: BluetoothInformationService()
                 )
                 #endif
             case .bonjour:
                 PeerAdvertisingView(
-                    service: BonjourAdvertisingService(ownPeerID: ownPeerID, service: .bonjour, endOfMessageSingal: .defaultEndOfMessageSignal),
+                    service: BonjourAdvertisingService(
+                        ownPeerID: ownPeerID,
+                        service: .bonjour,
+                        endOfMessageSingal: .defaultEndOfMessageSignal
+                    ),
                     informationService: BonjourInformationService()
                 )
             case .multipeer:
@@ -51,12 +59,20 @@ enum NavigationDestination: Hashable {
             switch serviceType {
             case .bluetooth:
                 PeerDiscoveryView(
-                    service: BluetoothDiscoveryService(ownPeerID: ownPeerID, service: .bluetooth, endOfMessageSingal: .defaultEndOfMessageSignal),
+                    service: BluetoothDiscoveryService(
+                        ownPeerID: ownPeerID,
+                        service: .bluetooth,
+                        endOfMessageSingal: .defaultEndOfMessageSignal
+                    ),
                     informationService: BluetoothInformationService()
                 )
             case .bonjour:
                 PeerDiscoveryView(
-                    service: BonjourDiscoveryService(ownPeerID: ownPeerID, service: .bonjour, endOfMessageSingal: .defaultEndOfMessageSignal),
+                    service: BonjourDiscoveryService(
+                        ownPeerID: ownPeerID,
+                        service: .bonjour,
+                        endOfMessageSingal: .defaultEndOfMessageSignal
+                    ),
                     informationService: BonjourInformationService()
                 )
             case .multipeer:

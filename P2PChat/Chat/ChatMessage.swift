@@ -12,6 +12,7 @@ enum ChatMessageContent: Codable {
     case text(String)
     case image(ChatMessageImage)
     case nameAnnouncement(String)
+    case file(String, Data)
 }
 
 struct ChatMessage: Identifiable, Codable {

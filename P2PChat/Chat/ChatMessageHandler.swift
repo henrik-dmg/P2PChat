@@ -47,11 +47,13 @@ final class ChatMessageHandler<ChatPeer: Peer> {
     }
 
     @ObservationIgnored
-    let transferService: any PeerDataTransferService<ChatPeer>
+    private let transferService: any PeerDataTransferService<ChatPeer>
     @ObservationIgnored
-    let encoder = JSONEncoder()
+    private let encoder = JSONEncoder()
     @ObservationIgnored
-    let decoder = JSONDecoder()
+    private let decoder = JSONDecoder()
+    @ObservationIgnored
+    private let byteCountFormatter = ByteCountFormatter()
 
     // MARK: - Init
 
@@ -129,6 +131,9 @@ final class ChatMessageHandler<ChatPeer: Peer> {
             if !name.isEmpty {
                 peerGivenName = name
             }
+        case .file(let name, _):
+            let url = URL.documentsDirectory.appendingPathComponent(name)
+            print("Received file \(name), saving to \(url.path())")
         default:
             chatMessages.append(message)
         }
@@ -144,6 +149,8 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
 
     func serviceReceived(data: Data, from peer: String) {
         do {
+            let formattedMessageSize = byteCountFormatter.string(from: .init(value: Double(data.count), unit: .bytes))
+            Logger.chat.debug("Received message from \(peer): \(formattedMessageSize)")
             let message = try decoder.decode(ChatMessage.self, from: data)
             handleMessageReceived(message)
         } catch {
@@ -158,6 +165,7 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
     }
 
     func serviceDidConnectToPeer(with id: String) {
+        PerformanceLogger.shared.track(.connectionReady, for: id)
         isConnected = true
     }
 
@@ -166,7 +174,6 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
 extension Data {
 
     /// Hexadecimal string representation of `Data` object.
-
     var hexadecimal: String {
         map { String(format: "%02x", $0) }
             .joined()

@@ -47,7 +47,7 @@ struct ChatMessageCellView: View {
                 .font(.body)
                 .foregroundStyle(textColor)
                 .padding(8)
-        case .nameAnnouncement:
+        case .nameAnnouncement, .file:
             Text("This should not be displayed")
         case let .image(chatMessageImage):
             chatMessageImage.image { image in

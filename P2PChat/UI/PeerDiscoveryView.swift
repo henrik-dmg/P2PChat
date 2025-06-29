@@ -97,6 +97,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
     @ViewBuilder
     private func peerCellViewButtons(_ peer: ChatPeer) -> some View {
         Button {
+            PerformanceLogger.shared.track(.connectionInitiated, for: peer.id)
             service.connect(to: peer)
         } label: {
             Label("Connect", systemImage: "bubble.fill")
