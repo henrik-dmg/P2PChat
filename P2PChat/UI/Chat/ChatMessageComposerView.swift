@@ -29,10 +29,10 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
             }
             HStack(spacing: 12) {
                 TextField("Message", text: $chatMessageHandler.currentMessage)
+                    .textFieldStyle(.roundedBorder)
                     .onSubmit {
                         send()
                     }
-                    .textFieldStyle(.roundedBorder)
                 imagePicker()
                 sendButton(title: "Send")
                     .disabled(!isSendButtonEnabled)

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import OSLog
+import Logging
 import Observation
 import P2PKit
 import PhotosUI

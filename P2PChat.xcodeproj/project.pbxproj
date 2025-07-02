@@ -14,6 +14,7 @@
 		26482DDD2D92D6F30059019C /* P2PKit in Frameworks */ = {isa = PBXBuildFile; productRef = 26482DDC2D92D6F30059019C /* P2PKit */; };
 		26482DDF2D92DED60059019C /* AsyncButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26482DDE2D92DED60059019C /* AsyncButton.swift */; };
 		264D71FE2DB1969700E5E771 /* ChatsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 264D71FD2DB1969700E5E771 /* ChatsListView.swift */; };
+		264E97DD2E1545DE00CA8AF1 /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = 264E97DC2E1545DE00CA8AF1 /* Logging */; };
 		265607842DF5E30100D43036 /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 265607832DF5E2FD00D43036 /* PerformanceLogger.swift */; };
 		266192662D7B2B8C00CFC6D7 /* P2PChatApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 266192632D7B2B8C00CFC6D7 /* P2PChatApp.swift */; };
 		266192672D7B2B8C00CFC6D7 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2661925E2D7B2B8C00CFC6D7 /* Preview Assets.xcassets */; };
@@ -72,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				264E97DD2E1545DE00CA8AF1 /* Logging in Frameworks */,
 				26482DDD2D92D6F30059019C /* P2PKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -204,6 +206,7 @@
 			name = P2PChat;
 			packageProductDependencies = (
 				26482DDC2D92D6F30059019C /* P2PKit */,
+				264E97DC2E1545DE00CA8AF1 /* Logging */,
 			);
 			productName = P2PChat;
 			productReference = 2677AF6E2D747BF500A64065 /* P2PChat.app */;
@@ -234,6 +237,7 @@
 			mainGroup = 2677AF652D747BF400A64065;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				264E97DB2E1545DE00CA8AF1 /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2677AF6F2D747BF500A64065 /* Products */;
@@ -517,10 +521,26 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		264E97DB2E1545DE00CA8AF1 /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
 		26482DDC2D92D6F30059019C /* P2PKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = P2PKit;
+		};
+		264E97DC2E1545DE00CA8AF1 /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 264E97DB2E1545DE00CA8AF1 /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -5,10 +5,15 @@
 //  Created by Henrik Panhans on 02.03.25.
 //
 
+import Logging
 import SwiftUI
 
 @main
 struct P2PChatApp: App {
+
+    init() {
+
+    }
 
     var body: some Scene {
         WindowGroup {

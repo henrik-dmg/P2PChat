@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import OSLog
+import Logging
 
 final class PerformanceLogger {
 
@@ -39,8 +39,6 @@ final class PerformanceLogger {
     // MARK: - Properties
 
     static let shared = PerformanceLogger()  // In a real application, you should avoid singletons
-
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.example.PerformanceLogger", category: "performance")
     private var events: [String: [Event]] = [:]
 
     // MARK: - Methods
@@ -89,7 +87,7 @@ final class PerformanceLogger {
     }
 
     private func logDuration(_ duration: TimeInterval, for eventType: EventType, peerID: String) {
-        logger.trace("Duration for \(eventType.rawValue) for \(peerID): \(duration) seconds")
+        Logger.performance.trace("Duration for \(eventType.rawValue) for \(peerID): \(duration) seconds")
     }
 
 }

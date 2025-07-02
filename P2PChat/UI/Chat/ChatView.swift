@@ -5,7 +5,7 @@
 //  Created by Henrik Panhans on 07.03.25.
 //
 
-import OSLog
+import Logging
 import P2PKit
 import PhotosUI
 import SwiftUI

@@ -5,24 +5,26 @@
 //  Created by Henrik Panhans on 23.04.25.
 //
 
-import OSLog
+import Foundation
+import Logging
 
 extension Logger {
 
     private static var subsystem: String {
-        Bundle.main.bundleIdentifier ?? "com.example.P2PChat"
+        Bundle.main.bundleIdentifier ?? "dev.panhans.P2PChat"
     }
 
-    static let chat = Logger(subsystem: subsystem, category: "chat")
+    static let chat = Logger(label: subsystem + ".chat")
+    static let performance = Logger(label: subsystem + ".performance")
 
     static func multipeer(_ subCategory: String) -> Logger {
-        Logger(subsystem: subsystem, category: "multipeer-\(subCategory)")
+        Logger(label: subsystem + ".multipeer-\(subCategory)")
     }
     static func bluetooth(_ subCategory: String) -> Logger {
-        Logger(subsystem: subsystem, category: "bluetooth-\(subCategory)")
+        Logger(label: subsystem + ".bluetooth-\(subCategory)")
     }
     static func bonjour(_ subCategory: String) -> Logger {
-        Logger(subsystem: subsystem, category: "bonjour-\(subCategory)")
+        Logger(label: subsystem + ".bonjour-\(subCategory)")
     }
 
 }
