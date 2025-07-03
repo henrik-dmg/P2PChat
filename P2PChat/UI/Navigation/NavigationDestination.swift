@@ -10,7 +10,6 @@ import SwiftUI
 
 enum NavigationDestination: Hashable {
 
-    case nameOnboarding
     case servicePicker
     case peerPicker(ServiceType)
     case advertising(ServiceType, String)
@@ -19,8 +18,6 @@ enum NavigationDestination: Hashable {
     @ViewBuilder
     func view() -> some View {
         switch self {
-        case .nameOnboarding:
-            NameOnboardingView()
         case .servicePicker:
             ServicePickerView()
         case let .peerPicker(serviceType):

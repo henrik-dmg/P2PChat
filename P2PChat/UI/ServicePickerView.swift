@@ -16,7 +16,7 @@ struct ServicePickerView: View {
     var settings
 
     @State
-    private var isPresentingNamePicker = false
+    private var isPresentingSettings = false
 
     var body: some View {
         List {
@@ -30,22 +30,20 @@ struct ServicePickerView: View {
                 Label("Multipeer", systemImage: "wifi")
             }
         }
-        .sheet(isPresented: $isPresentingNamePicker) {
-            NavigationStack {
-                NameOnboardingView()
-            }
-        }
         .navigationTitle("P2P Services")
+        .sheet(isPresented: $isPresentingSettings) {
+            SettingsView()
+        }
         .onAppear {
             guard !settings.isNameValid(settings.name) else {
                 return
             }
-            isPresentingNamePicker = true
+            isPresentingSettings = true
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                Button("Change Name", systemImage: "gear") {
-                    isPresentingNamePicker = true
+                Button("Settings", systemImage: "gear") {
+                    isPresentingSettings = true
                 }
             }
         }

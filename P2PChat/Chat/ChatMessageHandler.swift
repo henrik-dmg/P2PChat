@@ -144,19 +144,17 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 extension ChatMessageHandler: PeerDataTransferServiceDelegate {
 
     func serviceDidFailToConnectToPeer(with id: String, error: any Error) {
-        print("Did fail to connect to peer", id)
+        Logger.chat.error("Did fail to connect to peer with id: \(id)")
     }
 
     func serviceReceived(data: Data, from peer: String) {
         do {
-            let formattedMessageSize = byteCountFormatter.string(from: .init(value: Double(data.count), unit: .bytes))
-            Logger.chat.debug("Received message from \(peer): \(formattedMessageSize)")
             let message = try decoder.decode(ChatMessage.self, from: data)
             handleMessageReceived(message)
         } catch {
-            print("Error decoding message:" + error.localizedDescription)
-            print(String(data: data, encoding: .utf8) ?? "No UTF-8 decoding")
-            print(data.hexadecimal)
+            Logger.chat.error("Error decoding message: \(error.localizedDescription)")
+            Logger.chat.error("\(String(data: data, encoding: .utf8) ?? "No UTF-8 decoding")")
+            Logger.chat.error("\(data.hexadecimal)")
         }
     }
 
@@ -165,7 +163,6 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
     }
 
     func serviceDidConnectToPeer(with id: String) {
-        PerformanceLogger.shared.track(.connectionReady, for: id)
         isConnected = true
     }
 

@@ -1,13 +1,14 @@
 //
-//  NameOnboardingView.swift
+//  SettingsNameEditView.swift
 //  P2PChat
 //
 //  Created by Henrik Panhans on 27.03.25.
 //
 
+import Logging
 import SwiftUI
 
-struct NameOnboardingView: View {
+struct SettingsNameEditView: View {
 
     @State
     private var editingName = ""
@@ -23,29 +24,23 @@ struct NameOnboardingView: View {
         List {
             Text("Please enter a name for your chat session. This name will be shown to other users.")
             TextField("Name", text: $editingName) {
-                saveAndDismiss()
+                updateNameIfValid()
             }
         }
         .navigationTitle("Edit Name")
-        //        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button("Save", action: saveAndDismiss)
-                    .disabled(!isNameValid)
-            }
-        }
-        .interactiveDismissDisabled(!isNameValid)
         .task {
             editingName = settings.name
         }
+        .onDisappear {
+            updateNameIfValid()
+        }
     }
 
-    private func saveAndDismiss() {
-        guard isNameValid else {
-            return
+    private func updateNameIfValid() {
+        if isNameValid && settings.name != editingName {
+            settings.name = editingName.trimmingCharacters(in: .whitespacesAndNewlines)
+            Logger.app.notice("Name changed to \(editingName)")
         }
-        settings.name = editingName
-        dismiss()
     }
 
     private var isNameValid: Bool {
