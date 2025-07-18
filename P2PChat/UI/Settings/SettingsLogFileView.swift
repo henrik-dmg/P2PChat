@@ -21,13 +21,14 @@ struct SettingsLogFileView: View {
             Text(content)
                 .multilineTextAlignment(.leading)
                 .textSelection(.enabled)
+                .padding(.horizontal)
         }
         .navigationTitle(url.lastPathComponent)
-        .task {
-            guard let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) else {
-                return
-            }
-            content = string
+        .task(id: url) {
+//            guard let data = try? Data(contentsOf: url), let string = String(data: data, encoding: .utf8) else {
+//                return
+//            }
+//            content = string
         }
         .toolbar {
             ToolbarItem(placement: .primaryAction) {

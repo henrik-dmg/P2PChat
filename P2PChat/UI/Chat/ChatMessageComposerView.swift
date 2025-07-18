@@ -19,8 +19,6 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
     private var isPresentingAlert = false
     @State
     private var errorDescription: String?
-    @State
-    private var sendTask: Task<Void, Error>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -31,7 +29,7 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
                 TextField("Message", text: $chatMessageHandler.currentMessage)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit {
-                        send()
+                        chatMessageHandler.sendMessage()
                     }
                 imagePicker()
                 sendButton(title: "Send")
@@ -61,22 +59,11 @@ struct ChatMessageComposerView<ChatPeer: Peer>: View {
 
     private func sendButton(title: LocalizedStringKey) -> some View {
         Button {
-            send()
+            chatMessageHandler.sendMessage()
         } label: {
             Label(title, systemImage: "paperplane")
                 .symbolVariant(.fill)
                 .labelStyle(.iconOnly)
-        }
-    }
-
-    private func send() {
-        let task = Task {
-            try await chatMessageHandler.sendMessage()
-        }
-        let currentTask = self.sendTask
-        sendTask = Task {
-            _ = try await currentTask?.value
-            _ = try await task.value
         }
     }
 

@@ -16,7 +16,7 @@ struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationSe
     let informationService: InformationService
 
     @State
-    private var sheetContent: SheetContent<ChatPeer>?
+    private var sheetContent: ChatSheetContent<ChatPeer>?
 
     var body: some View {
         List {
@@ -31,28 +31,11 @@ struct PeerAdvertisingView<ChatPeer: Peer, InformationService: PeerInformationSe
                     } else {
                         service.startAdvertisingService()
                     }
-                }
+                }.sensoryFeedback(service.state.isActive ? .start : .stop, trigger: service.state)
             }
         }
         .navigationTitle("Advertising")
-        .sheet(item: $sheetContent) { content in
-            switch content {
-            case let .chat(peerIDs):
-                ChatsListView(peerIDs: peerIDs, service: service)
-            case let .inspect(peer):
-                informationService.peerInformationView(for: peer)
-            }
-        }
-        .onChange(of: service.connectedPeers) { oldValue, newValue in
-            if newValue.isEmpty {
-                if case .chat = sheetContent {
-                    service.disconnectAll()
-                    self.sheetContent = nil
-                }
-            } else {
-                self.sheetContent = .chat(newValue)
-            }
-        }
+        .chatSheet($sheetContent, service: service, informationService: informationService)
     }
 
 }

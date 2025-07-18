@@ -27,7 +27,7 @@ struct ServicePickerView: View {
                 Label("Bonjour", systemImage: "bonjour")
             }
             NavigationLink(value: NavigationDestination.peerPicker(.multipeer)) {
-                Label("Multipeer", systemImage: "wifi")
+                Label("Multipeer", systemImage: "dot.radiowaves.left.and.right")
             }
         }
         .navigationTitle("P2P Services")

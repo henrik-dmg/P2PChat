@@ -54,6 +54,8 @@ final class ChatMessageHandler<ChatPeer: Peer> {
     private let decoder = JSONDecoder()
     @ObservationIgnored
     private let byteCountFormatter = ByteCountFormatter()
+    @ObservationIgnored
+    private var sendTask: Task<Void, Error>?
 
     // MARK: - Init
 
@@ -66,12 +68,18 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 
     // MARK: - Methods
 
-    func sendMessage() async throws {
-        if case .success(let chatMessageImage) = imageState {
-            try await sendContent(.image(chatMessageImage))
-        }
-        if !currentMessage.isEmpty {
-            try await sendContent(.text(currentMessage))
+    func sendMessage() {
+        performAsync { [weak self] in
+            guard let self else {
+                return
+            }
+
+            if case .success(let chatMessageImage) = imageState {
+                try await sendContent(.image(chatMessageImage))
+            }
+            if !currentMessage.isEmpty {
+                try await sendContent(.text(currentMessage))
+            }
         }
     }
 
@@ -89,19 +97,37 @@ final class ChatMessageHandler<ChatPeer: Peer> {
 
     // MARK: - Helpers
 
+    private func performAsync(_ action: @escaping () async throws -> Void) {
+        let task = Task {
+            try await action()
+        }
+        let currentTask = self.sendTask
+        sendTask = Task {
+            _ = try await currentTask?.value
+            _ = try await task.value
+        }
+    }
+
     private func sendContent(_ content: ChatMessageContent) async throws {
         let chatMessage = ChatMessage(date: .now, sender: transferService.ownPeerID, recipient: peerID, content: content)
         let chatData = try encoder.encode(chatMessage)
-        try await transferService.send(chatData, to: peerID)
-        currentMessage = ""
-        imageState = .empty
 
         switch content {
         case .nameAnnouncement:
             break
-        default:
+        case .deliveredReceipt:
+            break
+        case .image:
+            imageState = .empty
             chatMessages.append(chatMessage)
+            PerformanceLogger.shared.track(.dataDispatched(byteCount: chatData.count), date: .now, for: peerID)
+        case .text:
+            currentMessage = ""
+            chatMessages.append(chatMessage)
+            PerformanceLogger.shared.track(.dataDispatched(byteCount: chatData.count), date: .now, for: peerID)
         }
+
+        try await transferService.send(chatData, to: peerID)
     }
 
     private func loadTransferable(from imageSelection: PhotosPickerItem) -> Progress {
@@ -124,17 +150,30 @@ final class ChatMessageHandler<ChatPeer: Peer> {
         }
     }
 
-    private func handleMessageReceived(_ message: ChatMessage) {
-        Logger.chat.debug("Handling incoming message \(message.id)")
+    private func handleMessageReceived(_ message: ChatMessage, date: Date) {
+        Logger.chat.debug(
+            "Handling incoming message \(message.id)",
+            metadata: [
+                "message-type": .string(message.content.typeName),
+                "message-received": .stringConvertible(date.millisecondsSince1970)
+            ]
+        )
+
         switch message.content {
         case let .nameAnnouncement(name):
             if !name.isEmpty {
                 peerGivenName = name
             }
-        case .file(let name, _):
-            let url = URL.documentsDirectory.appendingPathComponent(name)
-            print("Received file \(name), saving to \(url.path())")
-        default:
+        case let .deliveredReceipt(messageID, date):
+            PerformanceLogger.shared.track(.dataReceived, date: date, for: peerID)
+            for (index, chatMessage) in chatMessages.enumerated() where chatMessage.id == messageID {
+                Logger.chat.trace("Marking message \(messageID) as read")
+                chatMessages[index].deliveredDate = date
+            }
+        case .text, .image:
+            performAsync { [weak self] in
+                try await self?.sendContent(.deliveredReceipt(message.id, date))
+            }
             chatMessages.append(message)
         }
     }
@@ -148,13 +187,13 @@ extension ChatMessageHandler: PeerDataTransferServiceDelegate {
     }
 
     func serviceReceived(data: Data, from peer: String) {
+        let date = Date.now
         do {
             let message = try decoder.decode(ChatMessage.self, from: data)
-            handleMessageReceived(message)
+            handleMessageReceived(message, date: date)
         } catch {
             Logger.chat.error("Error decoding message: \(error.localizedDescription)")
             Logger.chat.error("\(String(data: data, encoding: .utf8) ?? "No UTF-8 decoding")")
-            Logger.chat.error("\(data.hexadecimal)")
         }
     }
 
@@ -175,4 +214,5 @@ extension Data {
         map { String(format: "%02x", $0) }
             .joined()
     }
+
 }

@@ -30,16 +30,16 @@ struct CustomLogFormat: LogFormattable {
         date: Date,
         threadID: UInt64
     ) -> String {
-        let date = dateFormatter(date, withFormatter: dateFormat)
-        var info = swiftLogInfo
-
+        let formattedDate = dateFormatter(date, withFormatter: dateFormat)
+        var info = swiftLogInfo.filter { !$0.value.isEmpty }
+        info["timestamp"] = date.millisecondsSince1970.description
         let actualLabel = info.removeValue(forKey: "label") ?? label
-        let baseMessage = "[\(level): \(actualLabel)] \(message)"
 
         if isFormattingForConsole {
-            return baseMessage
+            // File logging doesn't need timestamp logging
+            return "[\(level.emoji) \(level): \(actualLabel)] \(message) \(info)"
         } else {
-            return "\(date) \(baseMessage) \(info)"
+            return "\(formattedDate) [\(level): \(actualLabel)] \(message) \(info)"
         }
     }
 }

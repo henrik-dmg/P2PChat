@@ -9,22 +9,6 @@ import Observation
 import P2PKit
 import SwiftUI
 
-enum SheetContent<ChatPeer: Peer>: Identifiable {
-
-    case inspect(ChatPeer)
-    case chat([ChatPeer.ID])
-
-    var id: String {
-        switch self {
-        case let .inspect(peer):
-            peer.id
-        case let .chat(peerIDs):
-            peerIDs.joined(separator: "~")
-        }
-    }
-
-}
-
 struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationService<ChatPeer>>: View {
 
     @State
@@ -32,7 +16,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
     let informationService: InformationService
 
     @State
-    private var sheetContent: SheetContent<ChatPeer>?
+    private var sheetContent: ChatSheetContent<ChatPeer>?
 
     var body: some View {
         List {
@@ -47,6 +31,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
                     service.startDiscoveringPeers()
                 }
             }
+            .sensoryFeedback(service.state.isActive ? .start : .stop, trigger: service.state)
             ForEach(service.availablePeers) { peer in
                 #if os(iOS)
                 swipeActionPeerCellView(peer)
@@ -56,28 +41,7 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
             }
         }
         .navigationTitle("Discovery")
-        .sheet(item: $sheetContent) { content in
-            switch content {
-            case let .chat(peerIDs):
-                ChatsListView(peerIDs: peerIDs, service: service)
-            case let .inspect(peer):
-                informationService.peerInformationView(for: peer)
-            }
-        }
-        .onChange(of: service.connectedPeers) { oldValue, newValue in
-            guard oldValue != newValue else {
-                return
-            }
-            if newValue.isEmpty {
-                if case .chat = sheetContent {
-                    service.disconnectAll()
-                    self.sheetContent = nil
-                }
-            } else {
-                self.sheetContent = .chat(newValue)
-                service.stopDiscoveringPeers()
-            }
-        }
+        .chatSheet($sheetContent, service: service, informationService: informationService)
     }
 
     private func swipeActionPeerCellView(_ peer: ChatPeer) -> some View {
@@ -97,11 +61,13 @@ struct PeerDiscoveryView<ChatPeer: Peer, InformationService: PeerInformationServ
     @ViewBuilder
     private func peerCellViewButtons(_ peer: ChatPeer) -> some View {
         Button {
+            PerformanceLogger.shared.track(.connectionInitiated, date: .now, for: peer.id)
             service.connect(to: peer)
         } label: {
             Label("Connect", systemImage: "bubble.fill")
         }
         .tint(.green)
+        .disabled(peer.id == service.ownPeerID)
         Button {
             sheetContent = .inspect(peer)
         } label: {

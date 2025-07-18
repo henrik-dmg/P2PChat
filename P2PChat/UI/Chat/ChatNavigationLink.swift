@@ -24,7 +24,7 @@ struct ChatNavigationLink<ChatPeer: Peer>: View {
             ChatView(chatMessageHandler: chatMessageHandler)
         }
         .id(chatMessageHandler.peerID)
-        .task {
+        .task(id: chatMessageHandler.peerID) {
             do {
                 try await chatMessageHandler.announceNameToPeer()
             } catch {

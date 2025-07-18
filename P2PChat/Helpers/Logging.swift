@@ -41,6 +41,8 @@ extension FileRotationLogger {
 
     static let `default`: FileRotationLogger = {
         let fileURL = try! URL.logsDirectory
+        let currentLogFile = fileURL.appendingPathComponent("current.log", conformingTo: .log)
+
         let rotationConfig = RotationConfig(
             suffixExtension: .numbering,
             maxFileSize: 10 * 1024 * 1024,
@@ -49,8 +51,8 @@ extension FileRotationLogger {
         return try! FileRotationLogger(
             "dev.panhans.p2pchat.filerotation",
             logLevel: .debug,
-            logFormat: CustomLogFormat(isFormattingForConsole: true),
-            fileURL: fileURL.appendingPathComponent("current.log", conformingTo: .log),
+            logFormat: CustomLogFormat(isFormattingForConsole: false),
+            fileURL: currentLogFile,
             rotationConfig: rotationConfig,
             delegate: nil
         )

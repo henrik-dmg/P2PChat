@@ -36,6 +36,11 @@ struct ChatMessageCellView: View {
             Text(isOwnMessage ? ownPeerID : peerGivenName ?? message.sender)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
+            if let deliveredDate = message.deliveredDate {
+                Text("\(deliveredDate.millisecondsSince1970 - message.date.millisecondsSince1970)ms")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
     }
 
@@ -47,7 +52,7 @@ struct ChatMessageCellView: View {
                 .font(.body)
                 .foregroundStyle(textColor)
                 .padding(8)
-        case .nameAnnouncement, .file:
+        case .nameAnnouncement, .deliveredReceipt:
             Text("This should not be displayed")
         case let .image(chatMessageImage):
             chatMessageImage.image { image in
